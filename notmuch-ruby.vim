@@ -19,6 +19,10 @@ let g:notmuch_rb_search_maps = {
 	\ 'I':		':call <SID>NM_search_mark_read_thread()<CR>',
 	\ }
 
+let g:notmuch_rb_show_maps = {
+	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
+	\ }
+
 let s:notmuch_rb_folders_default = [
 	\ [ 'new', 'tag:inbox and tag:unread' ],
 	\ [ 'inbox', 'tag:inbox' ],
@@ -117,6 +121,7 @@ ruby << EOF
 		end
 	end
 EOF
+	call <SID>NM_set_map(g:notmuch_rb_show_maps)
 endfunction
 
 function! s:NM_search_show_thread()
