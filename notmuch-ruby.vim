@@ -176,6 +176,11 @@ ruby << EOF
 			map { |t| t.to_s }.join(" ")
 		end
 	end
+	class Notmuch::Message
+		def to_s
+			"id:%s" % message_id
+		end
+	end
 EOF
 	call <SID>NM_folders()
 endfunction
