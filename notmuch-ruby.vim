@@ -50,6 +50,9 @@ function! s:NotMuchR()
 ruby << EOF
 	require 'notmuch'
 	$db = Notmuch::Database.new(VIM::evaluate('g:notmuch_rb_database'))
+	def vim_p(s)
+		VIM::command("echo '#{s}'")
+	end
 	class VIM::Buffer
 		def <<(a)
 			append(count(), a)
