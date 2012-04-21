@@ -217,7 +217,7 @@ ruby << EOF
 
 	class Notmuch::Tags
 		def to_s
-			map { |t| t.to_s }.join(" ")
+			to_a.join(" ")
 		end
 	end
 
