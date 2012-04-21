@@ -8,15 +8,34 @@ endif
 
 let g:loaded_notmuch_rb = "yep"
 
+let g:notmuch_rb_folders_maps = {
+	\ '<Enter>':	':call <SID>NM_folders_show_search()<CR>',
+	\ }
+
 let s:notmuch_rb_folders_default = [
 	\ [ 'new', 'tag:inbox and tag:unread' ],
 	\ [ 'inbox', 'tag:inbox' ],
 	\ [ 'unread', 'tag:unread' ],
 	\ ]
 
+let s:notmuch_rb_date_format_default = '%d.%m.%y'
+
 if !exists('g:notmuch_rb_folders')
 	let g:notmuch_rb_folders = s:notmuch_rb_folders_default
 endif
+
+if !exists('g:notmuch_rb_date_format')
+	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
+endif
+
+"" basic
+
+function! s:NM_set_map(maps)
+	nmapclear
+	for [key, code] in items(a:maps)
+		exec printf('nnoremap <buffer> %s %s', key, code)
+	endfor
+endfunction
 
 function! s:NM_new_buffer(type)
 	enew
@@ -32,26 +51,63 @@ function! s:NM_set_menu_buffer()
 	setlocal nowrap
 endfunction
 
+"" main
+
+function! s:NM_search(words)
+	call <SID>NM_new_buffer('search')
+ruby << EOF
+	VIM::Buffer::current.render do |b|
+		words = VIM::evaluate('a:words')
+		date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
+		q = $db.query(words.join(" "))
+		q.search_threads.each do |e|
+			authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
+			date = Time.at(e.newest_date).strftime(date_fmt)
+			b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.total_messages, authors, e.subject, e.tags]
+		end
+	end
+EOF
+	call <SID>NM_set_menu_buffer()
+	call <SID>NM_set_map(g:notmuch_rb_search_maps)
+endfunction
+
+function! s:NM_folders_show_search()
+ruby << EOF
+	n = VIM::Buffer::current.line_number
+	s = $searches[n - 1]
+	VIM::command("call <SID>NM_search(['#{s}'])")
+EOF
+endfunction
+
 function! s:NM_folders()
 	call <SID>NM_new_buffer('folders')
 ruby << EOF
 	VIM::Buffer::current.render do |b|
 		folders = VIM::evaluate('g:notmuch_rb_folders')
+		$searches.clear
 		folders.each do |name, search|
 			q = $db.query(search)
+			$searches << search
 			b << "%9d %-20s (%s)" % [q.search_threads.count, name, search]
 		end
 	end
 EOF
 	call <SID>NM_set_menu_buffer()
+	call <SID>NM_set_map(g:notmuch_rb_folders_maps)
 endfunction
+
+"" root
 
 function! s:NotMuchR()
 ruby << EOF
 	require 'notmuch'
 	$db = Notmuch::Database.new(VIM::evaluate('g:notmuch_rb_database'))
+	$searches = []
 	def vim_p(s)
 		VIM::command("echo '#{s}'")
+	end
+	def author_filter(a)
+		a.gsub(/(.*?)[\.@].*/, '\1')
 	end
 	class VIM::Buffer
 		def <<(a)
@@ -60,6 +116,11 @@ ruby << EOF
 		def render
 			yield self
 			delete(1)
+		end
+	end
+	class Notmuch::Tags
+		def to_s
+			map { |t| t.to_s }.join(" ")
 		end
 	end
 EOF
