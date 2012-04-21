@@ -234,6 +234,12 @@ ruby << EOF
 		end
 	end
 
+	# workaround for bug in vim's ruby
+	class Object
+		def flush
+		end
+	end
+
 	class Mail::Message
 		def plain
 			if multipart?
