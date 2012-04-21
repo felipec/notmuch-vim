@@ -149,7 +149,12 @@ ruby << EOF
 		VIM::command("echo '#{s}'")
 	end
 	def author_filter(a)
-		a.gsub(/(.*?)[\.@].*/, '\1')
+		# TODO email format, aliases
+		a.strip!
+		a.gsub!(/[\.@].*/, '')
+		a.gsub!(/^ext /, '')
+		a.gsub!(/ \(.*\)/, '')
+		a
 	end
 	def search_thread_id
 		n = VIM::Buffer::current.line_number
