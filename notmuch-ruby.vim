@@ -95,9 +95,9 @@ ruby << EOF
 		words = VIM::evaluate('a:words')
 		q = $db.query(words.join(" "))
 		msgs = q.search_messages
-		msgs.each do |e|
-			b << "%s" % [e.header('subject')]
-			m = Mail.read(e.filename)
+		msgs.each do |msg|
+			b << "%s" % [msg['subject']]
+			m = Mail.read(msg.filename)
 			m.plain.each_line do |l|
 				b << l.chomp
 			end
