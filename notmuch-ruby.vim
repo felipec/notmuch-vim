@@ -164,9 +164,11 @@ ruby << EOF
 	$searches = []
 	$buf_queue = []
 	$threads = []
+
 	def vim_p(s)
 		VIM::command("echo '#{s}'")
 	end
+
 	def author_filter(a)
 		# TODO email format, aliases
 		a.strip!
@@ -175,16 +177,19 @@ ruby << EOF
 		a.gsub!(/ \(.*\)/, '')
 		a
 	end
+
 	def search_thread_id
 		n = VIM::Buffer::current.line_number
 		t = $threads[n - 1]
 		return "thread:#{t}"
 	end
+
 	def do_write
 		db = Notmuch::Database.new($db_name, :mode => Notmuch::MODE_READ_WRITE)
 		yield db
 		db.close
 	end
+
 	def do_tag(filter, tags)
 		do_write do |db|
 			q = db.query(filter)
@@ -200,6 +205,7 @@ ruby << EOF
 			end
 		end
 	end
+
 	class VIM::Buffer
 		def <<(a)
 			append(count(), a)
@@ -209,11 +215,13 @@ ruby << EOF
 			delete(1)
 		end
 	end
+
 	class Notmuch::Tags
 		def to_s
 			map { |t| t.to_s }.join(" ")
 		end
 	end
+
 	class Notmuch::Message
 		def to_s
 			"id:%s" % message_id
