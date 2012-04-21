@@ -141,7 +141,8 @@ endfunction
 function! s:NotMuchR()
 ruby << EOF
 	require 'notmuch'
-	$db = Notmuch::Database.new(VIM::evaluate('g:notmuch_rb_database'))
+	$db_name = VIM::evaluate('g:notmuch_rb_database')
+	$db = Notmuch::Database.new($db_name)
 	$searches = []
 	$buf_queue = []
 	$threads = []
