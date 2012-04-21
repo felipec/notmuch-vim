@@ -39,14 +39,14 @@ endif
 
 function! s:NM_search_mark_read_then_archive_thread()
 ruby << EOF
-	do_tag(search_thread_id, "-inbox -unread")
+	do_tag(get_thread_id, "-inbox -unread")
 EOF
 	norm j
 endfunction
 
 function! s:NM_search_mark_read_thread()
 ruby << EOF
-	do_tag(search_thread_id, "-unread")
+	do_tag(get_thread_id, "-unread")
 EOF
 	norm j
 endfunction
@@ -104,7 +104,7 @@ endfunction
 
 function! s:NM_search_show_thread()
 ruby << EOF
-	id = search_thread_id
+	id = get_thread_id
 	VIM::command("call <SID>NM_show(['#{id}'])")
 EOF
 endfunction
@@ -178,10 +178,9 @@ ruby << EOF
 		a
 	end
 
-	def search_thread_id
-		n = VIM::Buffer::current.line_number
-		t = $threads[n - 1]
-		return "thread:#{t}"
+	def get_thread_id
+		n = VIM::Buffer::current.line_number - 1
+		return "thread:%s" % $threads[n]
 	end
 
 	def do_write
