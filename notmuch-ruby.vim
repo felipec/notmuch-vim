@@ -15,6 +15,8 @@ let g:notmuch_rb_folders_maps = {
 let g:notmuch_rb_search_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
 	\ '<Enter>':	':call <SID>NM_search_show_thread()<CR>',
+	\ 'A':		':call <SID>NM_search_mark_read_then_archive_thread()<CR>',
+	\ 'I':		':call <SID>NM_search_mark_read_thread()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -32,6 +34,22 @@ endif
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
 endif
+
+"" actions
+
+function! s:NM_search_mark_read_then_archive_thread()
+ruby << EOF
+	do_tag(search_thread_id, "-inbox -unread")
+EOF
+	norm j
+endfunction
+
+function! s:NM_search_mark_read_thread()
+ruby << EOF
+	do_tag(search_thread_id, "-unread")
+EOF
+	norm j
+endfunction
 
 "" basic
 
@@ -161,6 +179,26 @@ ruby << EOF
 		n = VIM::Buffer::current.line_number
 		t = $threads[n - 1]
 		return "thread:#{t}"
+	end
+	def do_write
+		db = Notmuch::Database.new($db_name, :mode => Notmuch::MODE_READ_WRITE)
+		yield db
+		db.close
+	end
+	def do_tag(filter, tags)
+		do_write do |db|
+			q = db.query(filter)
+			q.search_messages.each do |e|
+				tags.split.each do |t|
+					case t
+					when /^-(.*)/
+						e.remove_tag($1)
+					when /^\+(.*)/
+						e.add_tag($1)
+					end
+				end
+			end
+		end
 	end
 	class VIM::Buffer
 		def <<(a)
