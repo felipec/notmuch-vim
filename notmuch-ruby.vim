@@ -26,6 +26,7 @@ let s:notmuch_rb_folders_default = [
 	\ ]
 
 let s:notmuch_rb_date_format_default = '%d.%m.%y'
+let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
 
 if !exists('g:notmuch_rb_folders')
 	let g:notmuch_rb_folders = s:notmuch_rb_folders_default
@@ -33,6 +34,10 @@ endif
 
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
+endif
+
+if !exists('g:notmuch_rb_datetime_format')
+	let g:notmuch_rb_datetime_format = s:notmuch_rb_datetime_format_default
 endif
 
 "" actions
@@ -96,11 +101,19 @@ ruby << EOF
 		q = $db.query(words.join(" "))
 		msgs = q.search_messages
 		msgs.each do |msg|
-			b << "%s" % [msg['subject']]
 			m = Mail.read(msg.filename)
+			date_fmt = VIM::evaluate('g:notmuch_rb_datetime_format')
+			date = Time.at(msg.date).strftime(date_fmt)
+			b << "%s %s (%s)" % [msg['from'], date, msg.tags]
+			b << "Subject: %s" % [msg['subject']]
+			b << "To: %s" % m['to']
+			b << "Cc: %s" % m['cc']
+			b << "Date: %s" % m['date']
+			b << "--- %s ---" % m.mime_type
 			m.plain.each_line do |l|
 				b << l.chomp
 			end
+			b << ""
 		end
 	end
 EOF
