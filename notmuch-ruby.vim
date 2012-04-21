@@ -14,6 +14,7 @@ let g:notmuch_rb_folders_maps = {
 
 let g:notmuch_rb_search_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
+	\ '<Enter>':	':call <SID>NM_search_show_thread()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -69,6 +70,27 @@ endfunction
 
 "" main
 
+function! s:NM_show(words)
+	call <SID>NM_new_buffer('show')
+ruby << EOF
+	VIM::Buffer::current.render do |b|
+		words = VIM::evaluate('a:words')
+		q = $db.query(words.join(" "))
+		msgs = q.search_messages
+		msgs.each do |e|
+			b << "%s" % [e.header('subject')]
+		end
+	end
+EOF
+endfunction
+
+function! s:NM_search_show_thread()
+ruby << EOF
+	id = search_thread_id
+	VIM::command("call <SID>NM_show(['#{id}'])")
+EOF
+endfunction
+
 function! s:NM_search(words)
 	call <SID>NM_new_buffer('search')
 ruby << EOF
@@ -76,10 +98,12 @@ ruby << EOF
 		words = VIM::evaluate('a:words')
 		date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
 		q = $db.query(words.join(" "))
+		$threads.clear
 		q.search_threads.each do |e|
 			authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
 			date = Time.at(e.newest_date).strftime(date_fmt)
 			b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.total_messages, authors, e.subject, e.tags]
+			$threads << e.thread_id
 		end
 	end
 EOF
@@ -120,11 +144,17 @@ ruby << EOF
 	$db = Notmuch::Database.new(VIM::evaluate('g:notmuch_rb_database'))
 	$searches = []
 	$buf_queue = []
+	$threads = []
 	def vim_p(s)
 		VIM::command("echo '#{s}'")
 	end
 	def author_filter(a)
 		a.gsub(/(.*?)[\.@].*/, '\1')
+	end
+	def search_thread_id
+		n = VIM::Buffer::current.line_number
+		t = $threads[n - 1]
+		return "thread:#{t}"
 	end
 	class VIM::Buffer
 		def <<(a)
