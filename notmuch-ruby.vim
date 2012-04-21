@@ -12,6 +12,10 @@ let g:notmuch_rb_folders_maps = {
 	\ '<Enter>':	':call <SID>NM_folders_show_search()<CR>',
 	\ }
 
+let g:notmuch_rb_search_maps = {
+	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
+	\ }
+
 let s:notmuch_rb_folders_default = [
 	\ [ 'new', 'tag:inbox and tag:unread' ],
 	\ [ 'inbox', 'tag:inbox' ],
@@ -30,6 +34,15 @@ endif
 
 "" basic
 
+function! s:NM_kill_this_buffer()
+	bdelete!
+ruby << EOF
+	$buf_queue.pop
+	b = $buf_queue.last
+	VIM::command("buffer #{b}") if b
+EOF
+endfunction
+
 function! s:NM_set_map(maps)
 	nmapclear
 	for [key, code] in items(a:maps)
@@ -43,6 +56,9 @@ function! s:NM_new_buffer(type)
 	keepjumps 0d
 	execute printf('set filetype=notmuch-%s', a:type)
 	execute printf('set syntax=notmuch-%s', a:type)
+ruby << EOF
+	$buf_queue.push(VIM::Buffer::current.number)
+EOF
 endfunction
 
 function! s:NM_set_menu_buffer()
@@ -103,6 +119,7 @@ ruby << EOF
 	require 'notmuch'
 	$db = Notmuch::Database.new(VIM::evaluate('g:notmuch_rb_database'))
 	$searches = []
+	$buf_queue = []
 	def vim_p(s)
 		VIM::command("echo '#{s}'")
 	end
