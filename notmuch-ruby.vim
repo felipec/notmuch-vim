@@ -97,6 +97,10 @@ ruby << EOF
 		msgs = q.search_messages
 		msgs.each do |e|
 			b << "%s" % [e.header('subject')]
+			m = Mail.read(e.filename)
+			m.plain.each_line do |l|
+				b << l.chomp
+			end
 		end
 	end
 EOF
@@ -159,6 +163,9 @@ endfunction
 function! s:NotMuchR()
 ruby << EOF
 	require 'notmuch'
+	require 'rubygems'
+	require 'mail'
+
 	$db_name = VIM::evaluate('g:notmuch_rb_database')
 	$db = Notmuch::Database.new($db_name)
 	$searches = []
@@ -226,6 +233,25 @@ ruby << EOF
 			"id:%s" % message_id
 		end
 	end
+
+	class Mail::Message
+		def plain
+			if multipart?
+				p = text_part || html_part
+				return p ? p.plain : nil
+			end
+			text = decoded
+			if mime_type == "text/html"
+				IO.popen("elinks --dump", "w+") do |pipe|
+					pipe.write(text)
+					pipe.close_write
+					text = pipe.read
+				end
+			end
+			text
+		  end
+	end
+
 EOF
 	call <SID>NM_folders()
 endfunction
