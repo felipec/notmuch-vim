@@ -102,8 +102,8 @@ function! s:search_tag(tags)
 endfunction
 
 function! s:folders_search_prompt()
-        let text = input('Search: ')
-        call s:search(text)
+	let text = input('Search: ')
+	call s:search(text)
 endfunction
 
 function! s:folders_refresh()
