@@ -42,10 +42,6 @@ let s:notmuch_rb_date_format_default = '%d.%m.%y'
 let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
 let s:notmuch_rb_reader_default = 'terminal -e "mutt -f %s"'
 
-if !exists('g:notmuch_rb_folders')
-	let g:notmuch_rb_folders = s:notmuch_rb_folders_default
-endif
-
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
 endif
@@ -255,6 +251,15 @@ function! s:NM_set_defaults()
 
 	if exists('g:notmuch_rb_custom_show_maps')
 		call extend(g:notmuch_rb_show_maps, g:notmuch_rb_custom_show_maps)
+	endif
+
+	" TODO for now lets check the old folders too
+	if !exists('g:notmuch_rb_folders')
+		if exists('g:notmuch_folders')
+			let g:notmuch_rb_folders = g:notmuch_folders
+		else
+			let g:notmuch_rb_folders = s:notmuch_rb_folders_default
+		endif
 	endif
 endfunction
 
