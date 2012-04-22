@@ -248,7 +248,19 @@ endfunction
 
 "" root
 
+function! s:NM_set_defaults()
+	if exists('g:notmuch_rb_custom_search_maps')
+		call extend(g:notmuch_rb_search_maps, g:notmuch_rb_custom_search_maps)
+	endif
+
+	if exists('g:notmuch_rb_custom_show_maps')
+		call extend(g:notmuch_rb_show_maps, g:notmuch_rb_custom_show_maps)
+	endif
+endfunction
+
 function! s:NotMuchR()
+	call <SID>NM_set_defaults()
+
 ruby << EOF
 	require 'notmuch'
 	require 'rubygems'
