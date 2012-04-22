@@ -61,9 +61,7 @@ endif
 "" actions
 
 function! s:NM_show_info()
-ruby << EOF
-	vim_puts get_message.inspect
-EOF
+	ruby vim_puts get_message.inspect
 endfunction
 
 function! s:NM_show_extract_msg()
@@ -87,52 +85,38 @@ EOF
 endfunction
 
 function! s:NM_show_mark_read_then_archive_thread()
-ruby << EOF
-	do_tag(get_cur_view, "-inbox -unread")
-EOF
+	ruby do_tag(get_cur_view, "-inbox -unread")
 	call <SID>NM_show_next_thread()
 endfunction
 
 function! s:NM_show_mark_read_thread()
-ruby << EOF
-	do_tag(get_cur_view, "-unread")
-EOF
+	ruby do_tag(get_cur_view, "-unread")
 	call <SID>NM_show_next_thread()
 endfunction
 
 function! s:NM_search_info()
-ruby << EOF
-	vim_puts get_thread_id
-EOF
+	ruby vim_puts get_thread_id
 endfunction
 
 function! s:NM_search_refresh()
 	setlocal modifiable
-ruby << EOF
-	search_render($cur_search)
-EOF
+	ruby search_render($cur_search)
 	setlocal nomodifiable
 endfunction
 
 function! s:NM_search_mark_read_then_archive_thread()
-ruby << EOF
-	do_tag(get_thread_id, "-inbox -unread")
-EOF
+	ruby do_tag(get_thread_id, "-inbox -unread")
 	norm j
 endfunction
 
 function! s:NM_search_mark_read_thread()
-ruby << EOF
-	do_tag(get_thread_id, "-unread")
-EOF
+	ruby do_tag(get_thread_id, "-unread")
 	norm j
 endfunction
 
 function! s:NM_folders_refresh()
 	setlocal modifiable
-ruby << EOF
-	folders_render()
-EOF
+	ruby folders_render()
 	setlocal nomodifiable
 endfunction
 
@@ -180,9 +164,7 @@ function! s:NM_new_buffer(type)
 	keepjumps 0d
 	execute printf('set filetype=notmuch-%s', a:type)
 	execute printf('set syntax=notmuch-%s', a:type)
-ruby << EOF
-	$buf_queue.push(VIM::Buffer::current.number)
-EOF
+	ruby $buf_queue.push(VIM::Buffer::current.number)
 endfunction
 
 function! s:NM_set_menu_buffer()
@@ -269,9 +251,7 @@ endfunction
 
 function! s:NM_folders()
 	call <SID>NM_new_buffer('folders')
-ruby << EOF
-	folders_render()
-EOF
+	ruby folders_render()
 	call <SID>NM_set_menu_buffer()
 	call <SID>NM_set_map(g:notmuch_rb_folders_maps)
 endfunction
@@ -388,6 +368,7 @@ ruby << EOF
 	class Message
 		attr_accessor :start, :body_start, :end
 		attr_reader :message_id, :filename, :mail
+
 		def initialize(msg, mail)
 			@message_id = msg.message_id
 			@filename = msg.filename
