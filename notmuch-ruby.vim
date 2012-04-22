@@ -26,6 +26,7 @@ let g:notmuch_rb_show_maps = {
 	\ 'A':		':call <SID>NM_show_mark_read_then_archive_thread()<CR>',
 	\ 'I':		':call <SID>NM_show_mark_read_thread()<CR>',
 	\ 'o':		':call <SID>NM_show_open_msg()<CR>',
+	\ 'e':		':call <SID>NM_show_extract_msg()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -55,6 +56,17 @@ if !exists('g:notmuch_rb_reader')
 endif
 
 "" actions
+
+function! s:NM_show_extract_msg()
+ruby << EOF
+	m = get_message
+	m.mail.attachments.each do |a|
+		File.open(a.filename, 'w') do |f|
+			f.write a.body.decoded
+		end
+	end
+EOF
+endfunction
 
 function! s:NM_show_open_msg()
 ruby << EOF
@@ -169,7 +181,7 @@ ruby << EOF
 			msgs.each do |msg|
 				m = Mail.read(msg.filename)
 				part = m.find_first_text
-				nm_m = Message.new(msg)
+				nm_m = Message.new(msg, m)
 				$messages << nm_m
 				date_fmt = VIM::evaluate('g:notmuch_rb_datetime_format')
 				date = Time.at(msg.date).strftime(date_fmt)
@@ -329,10 +341,11 @@ ruby << EOF
 
 	class Message
 		attr_accessor :start, :body_start, :end
-		attr_reader :message_id, :filename
-		def initialize(msg)
+		attr_reader :message_id, :filename, :mail
+		def initialize(msg, mail)
 			@message_id = msg.message_id
 			@filename = msg.filename
+			@mail = mail
 			@start = 0
 			@end = 0
 		end
