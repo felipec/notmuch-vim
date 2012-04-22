@@ -65,7 +65,7 @@ function! s:new_file_buffer(type, fname)
 	exec printf('edit %s', a:fname)
 	execute printf('set filetype=notmuch-%s', a:type)
 	execute printf('set syntax=notmuch-%s', a:type)
-	ruby $buf_queue.push(VIM::Buffer::current.number)
+	ruby $buf_queue.push($curbuf.number)
 endfunction
 
 function! s:compose_unload()
@@ -220,7 +220,7 @@ function! s:new_buffer(type)
 	keepjumps 0d
 	execute printf('set filetype=notmuch-%s', a:type)
 	execute printf('set syntax=notmuch-%s', a:type)
-	ruby $buf_queue.push(VIM::Buffer::current.number)
+	ruby $buf_queue.push($curbuf.number)
 endfunction
 
 function! s:set_menu_buffer()
@@ -237,7 +237,7 @@ ruby << EOF
 	thread_id = VIM::evaluate('a:thread_id')
 	$cur_thread = thread_id
 	$messages.clear
-	VIM::Buffer::current.render do |b|
+	$curbuf.render do |b|
 		do_read do |db|
 			q = db.query(get_cur_view)
 			msgs = q.search_messages
@@ -299,7 +299,7 @@ endfunction
 
 function! s:folders_show_search()
 ruby << EOF
-	n = VIM::Buffer::current.line_number
+	n = $curbuf.line_number
 	s = $searches[n - 1]
 	VIM::command("call s:search('#{s}')")
 EOF
@@ -366,12 +366,12 @@ ruby << EOF
 	end
 
 	def get_thread_id
-		n = VIM::Buffer::current.line_number - 1
+		n = $curbuf.line_number - 1
 		return "thread:%s" % $threads[n]
 	end
 
 	def get_message
-		n = VIM::Buffer::current.line_number - 1
+		n = $curbuf.line_number - 1
 		return $messages.find { |m| n >= m.start && n <= m.end }
 	end
 
@@ -450,7 +450,7 @@ ruby << EOF
 	end
 
 	def folders_render()
-		VIM::Buffer::current.render do |b|
+		$curbuf.render do |b|
 			folders = VIM::evaluate('g:notmuch_rb_folders')
 			$searches.clear
 			do_read do |db|
@@ -470,8 +470,7 @@ ruby << EOF
 		$threads.clear
 		t = q.search_threads
 
-		b = VIM::Buffer::current
-		$render = b.render_staged(t) do |b, items|
+		$render = $curbuf.render_staged(t) do |b, items|
 			items.each do |e|
 				authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
 				date = Time.at(e.newest_date).strftime(date_fmt)
@@ -530,11 +529,11 @@ ruby << EOF
 		end
 
 		def is_ready?
-			@last_render - @b.line_number <= VIM::Window::current.height
+			@last_render - @b.line_number <= $curwin.height
 		end
 
 		def do_next
-			items = @enumerable.take(VIM::Window::current.height * 2)
+			items = @enumerable.take($curwin.height * 2)
 			return if items.empty?
 			@block.call @b, items
 			@last_render = @b.count
