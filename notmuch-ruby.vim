@@ -179,6 +179,7 @@ ruby << EOF
 				b << "To: %s" % m['to']
 				b << "Cc: %s" % m['cc']
 				b << "Date: %s" % m['date']
+				nm_m.body_start = b.count
 				b << "--- %s ---" % part.mime_type
 				part.convert.each_line do |l|
 					b << l.chomp
@@ -187,6 +188,11 @@ ruby << EOF
 				nm_m.end = b.count
 			end
 		end
+	end
+	$messages.each_with_index do |msg, i|
+		VIM::command("syntax region nmShowMsg#{i}Desc start='\\%%%il' end='\\%%%il' contains=@nmShowMsgDesc" % [msg.start, msg.start + 1])
+		VIM::command("syntax region nmShowMsg#{i}Head start='\\%%%il' end='\\%%%il' contains=@nmShowMsgHead" % [msg.start + 1, msg.body_start])
+		VIM::command("syntax region nmShowMsg#{i}Body start='\\%%%il' end='\\%%%dl' contains=@nmShowMsgBody" % [msg.body_start, msg.end])
 	end
 EOF
 	call <SID>NM_set_map(g:notmuch_rb_show_maps)
@@ -322,7 +328,7 @@ ruby << EOF
 	end
 
 	class Message
-		attr_accessor :start, :end
+		attr_accessor :start, :body_start, :end
 		attr_reader :message_id, :filename
 		def initialize(msg)
 			@message_id = msg.message_id
