@@ -110,7 +110,7 @@ endfunction
 
 function! s:show_cursor_moved()
 ruby << EOF
-	if $render.is_last?
+	if $render.is_ready?
 		VIM::command('setlocal modifiable')
 		$render.do_next
 		VIM::command('setlocal nomodifiable')
@@ -405,8 +405,8 @@ ruby << EOF
 			@b.render { do_next }
 		end
 
-		def is_last?
-			@b.line_number == @last_render - 1
+		def is_ready?
+			@last_render - @b.line_number <= VIM::Window::current.height
 		end
 
 		def do_next
