@@ -217,10 +217,10 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:NM_search(words)
+function! s:NM_search(search)
 	call <SID>NM_new_buffer('search')
 ruby << EOF
-	$cur_search = VIM::evaluate('a:words')
+	$cur_search = VIM::evaluate('a:search')
 	search_render($cur_search)
 EOF
 	call <SID>NM_set_menu_buffer()
@@ -231,7 +231,7 @@ function! s:NM_folders_show_search()
 ruby << EOF
 	n = VIM::Buffer::current.line_number
 	s = $searches[n - 1]
-	VIM::command("call <SID>NM_search(['#{s}'])")
+	VIM::command("call <SID>NM_search('#{s}')")
 EOF
 endfunction
 
@@ -311,7 +311,7 @@ ruby << EOF
 		VIM::Buffer::current.render do |b|
 			date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
 			do_read do |db|
-				q = db.query(search.join(" "))
+				q = db.query(search)
 				$threads.clear
 				q.search_threads.each do |e|
 					authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
