@@ -300,7 +300,7 @@ ruby << EOF
 				end
 			end
 			text
-		  end
+		end
 	end
 
 EOF
