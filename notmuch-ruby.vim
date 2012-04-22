@@ -124,6 +124,16 @@ endfunction
 
 "" basic
 
+function! s:NM_show_cursor_moved()
+ruby << EOF
+	if $render.is_last?
+		VIM::command('setlocal modifiable')
+		$render.do_next
+		VIM::command('setlocal nomodifiable')
+	end
+EOF
+endfunction
+
 function! s:NM_show_next_thread()
 	call <SID>NM_kill_this_buffer()
 	if line('.') != line('$')
@@ -232,6 +242,7 @@ ruby << EOF
 EOF
 	call <SID>NM_set_menu_buffer()
 	call <SID>NM_set_map(g:notmuch_rb_search_maps)
+	autocmd CursorMoved <buffer> call <SID>NM_show_cursor_moved()
 endfunction
 
 function! s:NM_folders_show_search()
@@ -323,17 +334,19 @@ ruby << EOF
 	end
 
 	def search_render(search)
-		VIM::Buffer::current.render do |b|
-			date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
-			do_read do |db|
-				q = db.query(search)
-				$threads.clear
-				q.search_threads.each do |e|
-					authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
-					date = Time.at(e.newest_date).strftime(date_fmt)
-					b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.matched_messages, authors, e.subject, e.tags]
-					$threads << e.thread_id
-				end
+		date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
+		db = Notmuch::Database.new($db_name)
+		q = db.query(search)
+		$threads.clear
+		t = q.search_threads
+
+		b = VIM::Buffer::current
+		$render = b.render_staged(t) do |b, items|
+			items.each do |e|
+				authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
+				date = Time.at(e.newest_date).strftime(date_fmt)
+				b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.matched_messages, authors, e.subject, e.tags]
+				$threads << e.thread_id
 			end
 		end
 	end
@@ -366,10 +379,37 @@ ruby << EOF
 		end
 	end
 
+	class StagedRender
+		def initialize(buffer, enumerable, block)
+			@b = buffer
+			@enumerable = enumerable
+			@block = block
+			@last_render = 0
+
+			@b.render { do_next }
+		end
+
+		def is_last?
+			@b.line_number == @last_render - 1
+		end
+
+		def do_next
+			items = @enumerable.take(VIM::Window::current.height * 2)
+			return if items.empty?
+			@block.call @b, items
+			@last_render = @b.count
+		end
+	end
+
 	class VIM::Buffer
 		def <<(a)
 			append(count(), a)
 		end
+
+		def render_staged(enumerable, &block)
+			StagedRender.new(self, enumerable, block)
+		end
+
 		def render
 			old_count = count
 			yield self
