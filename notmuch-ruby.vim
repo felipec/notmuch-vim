@@ -9,27 +9,27 @@ endif
 let g:loaded_notmuch_rb = "yep"
 
 let g:notmuch_rb_folders_maps = {
-	\ '<Enter>':	':call <SID>folders_show_search()<CR>',
-	\ '=':		':call <SID>folders_refresh()<CR>',
+	\ '<Enter>':	'folders_show_search()',
+	\ '=':		'folders_refresh()',
 	\ }
 
 let g:notmuch_rb_search_maps = {
-	\ 'q':		':call <SID>kill_this_buffer()<CR>',
-	\ '<Enter>':	':call <SID>search_show_thread(1)<CR>',
-	\ '<Space>':	':call <SID>search_show_thread(2)<CR>',
-	\ 'A':		':call <SID>search_tag("-inbox -unread")<CR>',
-	\ 'I':		':call <SID>search_tag("-unread")<CR>',
-	\ '=':		':call <SID>search_refresh()<CR>',
-	\ '?':		':call <SID>search_info()<CR>',
+	\ 'q':		'kill_this_buffer()',
+	\ '<Enter>':	'search_show_thread(1)',
+	\ '<Space>':	'search_show_thread(2)',
+	\ 'A':		'search_tag("-inbox -unread")',
+	\ 'I':		'search_tag("-unread")',
+	\ '=':		'search_refresh()',
+	\ '?':		'search_info()',
 	\ }
 
 let g:notmuch_rb_show_maps = {
-	\ 'q':		':call <SID>kill_this_buffer()<CR>',
-	\ 'A':		':call <SID>show_tag("-inbox -unread")<CR>',
-	\ 'I':		':call <SID>show_tag("-unread")<CR>',
-	\ 'o':		':call <SID>show_open_msg()<CR>',
-	\ 'e':		':call <SID>show_extract_msg()<CR>',
-	\ '?':		':call <SID>show_info()<CR>',
+	\ 'q':		'kill_this_buffer()',
+	\ 'A':		'show_tag("-inbox -unread")',
+	\ 'I':		'show_tag("-unread")',
+	\ 'o':		'show_open_msg()',
+	\ 'e':		'show_extract_msg()',
+	\ '?':		'show_info()',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -140,7 +140,8 @@ endfunction
 function! s:set_map(maps)
 	nmapclear
 	for [key, code] in items(a:maps)
-		exec printf('nnoremap <buffer> %s %s', key, code)
+		let cmd = printf(":call <SID>%s<CR>", code)
+		exec printf('nnoremap <buffer> %s %s', key, cmd)
 	endfor
 endfunction
 
