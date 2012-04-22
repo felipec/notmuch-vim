@@ -133,6 +133,7 @@ ruby << EOF
 		msgs = q.search_messages
 		msgs.each do |msg|
 			m = Mail.read(msg.filename)
+			part = m.find_first_text
 			date_fmt = VIM::evaluate('g:notmuch_rb_datetime_format')
 			date = Time.at(msg.date).strftime(date_fmt)
 			b << "%s %s (%s)" % [msg['from'], date, msg.tags]
@@ -140,8 +141,8 @@ ruby << EOF
 			b << "To: %s" % m['to']
 			b << "Cc: %s" % m['cc']
 			b << "Date: %s" % m['date']
-			b << "--- %s ---" % m.mime_type
-			m.plain.each_line do |l|
+			b << "--- %s ---" % part.mime_type
+			part.convert.each_line do |l|
 				b << l.chomp
 			end
 			b << ""
@@ -286,11 +287,12 @@ ruby << EOF
 	end
 
 	class Mail::Message
-		def plain
-			if multipart?
-				p = text_part || html_part
-				return p ? p.plain : nil
-			end
+		def find_first_text
+			return self if not multipart?
+			return text_part || html_part
+		end
+
+		def convert
 			text = decoded
 			if mime_type == "text/html"
 				IO.popen("elinks --dump", "w+") do |pipe|
