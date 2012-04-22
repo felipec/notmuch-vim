@@ -164,20 +164,8 @@ endfunction
 function! s:NM_search(words)
 	call <SID>NM_new_buffer('search')
 ruby << EOF
-	VIM::Buffer::current.render do |b|
-		words = VIM::evaluate('a:words')
-		date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
-		do_read do |db|
-			q = db.query(words.join(" "))
-			$threads.clear
-			q.search_threads.each do |e|
-				authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
-				date = Time.at(e.newest_date).strftime(date_fmt)
-				b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.total_messages, authors, e.subject, e.tags]
-				$threads << e.thread_id
-			end
-		end
-	end
+	search = VIM::evaluate('a:words')
+	search_render(search)
 EOF
 	call <SID>NM_set_menu_buffer()
 	call <SID>NM_set_map(g:notmuch_rb_search_maps)
@@ -251,6 +239,22 @@ ruby << EOF
 		db = Notmuch::Database.new($db_name)
 		yield db
 		db.close
+	end
+
+	def search_render(search)
+		VIM::Buffer::current.render do |b|
+			date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
+			do_read do |db|
+				q = db.query(search.join(" "))
+				$threads.clear
+				q.search_threads.each do |e|
+					authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
+					date = Time.at(e.newest_date).strftime(date_fmt)
+					b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.total_messages, authors, e.subject, e.tags]
+					$threads << e.thread_id
+				end
+			end
+		end
 	end
 
 	def do_tag(filter, tags)
