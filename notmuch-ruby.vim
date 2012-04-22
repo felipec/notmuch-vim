@@ -276,8 +276,12 @@ ruby << EOF
 	$threads = []
 	$messages = []
 
+	def vim_puts(s)
+		VIM::command("echo '#{s.to_s}'")
+	end
+
 	def vim_p(s)
-		VIM::command("echo '#{s}'")
+		VIM::command("echo '#{s.inspect}'")
 	end
 
 	def author_filter(a)
