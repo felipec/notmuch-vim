@@ -9,27 +9,27 @@ endif
 let g:loaded_notmuch_rb = "yep"
 
 let g:notmuch_rb_folders_maps = {
-	\ '<Enter>':	':call <SID>NM_folders_show_search()<CR>',
-	\ '=':		':call <SID>NM_folders_refresh()<CR>',
+	\ '<Enter>':	':call <SID>folders_show_search()<CR>',
+	\ '=':		':call <SID>folders_refresh()<CR>',
 	\ }
 
 let g:notmuch_rb_search_maps = {
-	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
-	\ '<Enter>':	':call <SID>NM_search_show_thread(1)<CR>',
-	\ '<Space>':	':call <SID>NM_search_show_thread(2)<CR>',
-	\ 'A':		':call <SID>NM_search_tag("-inbox -unread")<CR>',
-	\ 'I':		':call <SID>NM_search_tag("-unread")<CR>',
-	\ '=':		':call <SID>NM_search_refresh()<CR>',
-	\ '?':		':call <SID>NM_search_info()<CR>',
+	\ 'q':		':call <SID>kill_this_buffer()<CR>',
+	\ '<Enter>':	':call <SID>search_show_thread(1)<CR>',
+	\ '<Space>':	':call <SID>search_show_thread(2)<CR>',
+	\ 'A':		':call <SID>search_tag("-inbox -unread")<CR>',
+	\ 'I':		':call <SID>search_tag("-unread")<CR>',
+	\ '=':		':call <SID>search_refresh()<CR>',
+	\ '?':		':call <SID>search_info()<CR>',
 	\ }
 
 let g:notmuch_rb_show_maps = {
-	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
-	\ 'A':		':call <SID>NM_show_tag("-inbox -unread")<CR>',
-	\ 'I':		':call <SID>NM_show_tag("-unread")<CR>',
-	\ 'o':		':call <SID>NM_show_open_msg()<CR>',
-	\ 'e':		':call <SID>NM_show_extract_msg()<CR>',
-	\ '?':		':call <SID>NM_show_info()<CR>',
+	\ 'q':		':call <SID>kill_this_buffer()<CR>',
+	\ 'A':		':call <SID>show_tag("-inbox -unread")<CR>',
+	\ 'I':		':call <SID>show_tag("-unread")<CR>',
+	\ 'o':		':call <SID>show_open_msg()<CR>',
+	\ 'e':		':call <SID>show_extract_msg()<CR>',
+	\ '?':		':call <SID>show_info()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -56,11 +56,11 @@ endif
 
 "" actions
 
-function! s:NM_show_info()
+function! s:show_info()
 	ruby vim_puts get_message.inspect
 endfunction
 
-function! s:NM_show_extract_msg()
+function! s:show_extract_msg()
 ruby << EOF
 	m = get_message
 	m.mail.attachments.each do |a|
@@ -71,7 +71,7 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:NM_show_open_msg()
+function! s:show_open_msg()
 ruby << EOF
 	m = get_message
 	mbox = File.join(ENV['HOME'], ".notmuch/vim_mbox")
@@ -80,27 +80,27 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:NM_show_tag(tags)
+function! s:show_tag(tags)
 	ruby do_tag(get_cur_view, VIM::evaluate('a:tags'))
-	call s:NM_show_next_thread()
+	call s:show_next_thread()
 endfunction
 
-function! s:NM_search_info()
+function! s:search_info()
 	ruby vim_puts get_thread_id
 endfunction
 
-function! s:NM_search_refresh()
+function! s:search_refresh()
 	setlocal modifiable
 	ruby search_render($cur_search)
 	setlocal nomodifiable
 endfunction
 
-function! s:NM_search_tag(tags)
+function! s:search_tag(tags)
 	ruby do_tag(get_thread_id, VIM::evaluate('a:tags'))
 	norm j
 endfunction
 
-function! s:NM_folders_refresh()
+function! s:folders_refresh()
 	setlocal modifiable
 	ruby folders_render()
 	setlocal nomodifiable
@@ -108,7 +108,7 @@ endfunction
 
 "" basic
 
-function! s:NM_show_cursor_moved()
+function! s:show_cursor_moved()
 ruby << EOF
 	if $render.is_last?
 		VIM::command('setlocal modifiable')
@@ -118,17 +118,17 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:NM_show_next_thread()
-	call s:NM_kill_this_buffer()
+function! s:show_next_thread()
+	call s:kill_this_buffer()
 	if line('.') != line('$')
 		norm j
-		call s:NM_search_show_thread(0)
+		call s:search_show_thread(0)
 	else
 		echo 'No more messages.'
 	endif
 endfunction
 
-function! s:NM_kill_this_buffer()
+function! s:kill_this_buffer()
 	bdelete!
 ruby << EOF
 	$buf_queue.pop
@@ -137,14 +137,14 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:NM_set_map(maps)
+function! s:set_map(maps)
 	nmapclear
 	for [key, code] in items(a:maps)
 		exec printf('nnoremap <buffer> %s %s', key, code)
 	endfor
 endfunction
 
-function! s:NM_new_buffer(type)
+function! s:new_buffer(type)
 	enew
 	setlocal buftype=nofile bufhidden=hide
 	keepjumps 0d
@@ -153,7 +153,7 @@ function! s:NM_new_buffer(type)
 	ruby $buf_queue.push(VIM::Buffer::current.number)
 endfunction
 
-function! s:NM_set_menu_buffer()
+function! s:set_menu_buffer()
 	setlocal nomodifiable
 	setlocal cursorline
 	setlocal nowrap
@@ -161,8 +161,8 @@ endfunction
 
 "" main
 
-function! s:NM_show(thread_id)
-	call s:NM_new_buffer('show')
+function! s:show(thread_id)
+	call s:new_buffer('show')
 ruby << EOF
 	thread_id = VIM::evaluate('a:thread_id')
 	$cur_thread = thread_id
@@ -200,10 +200,10 @@ ruby << EOF
 		VIM::command("syntax region nmShowMsg#{i}Body start='\\%%%il' end='\\%%%dl' contains=@nmShowMsgBody" % [msg.body_start, msg.end])
 	end
 EOF
-	call s:NM_set_map(g:notmuch_rb_show_maps)
+	call s:set_map(g:notmuch_rb_show_maps)
 endfunction
 
-function! s:NM_search_show_thread(mode)
+function! s:search_show_thread(mode)
 ruby << EOF
 	mode = VIM::evaluate('a:mode')
 	id = get_thread_id
@@ -212,39 +212,39 @@ ruby << EOF
 	when 1; $cur_filter = nil
 	when 2; $cur_filter = $cur_search
 	end
-	VIM::command("call s:NM_show('#{id}')")
+	VIM::command("call s:show('#{id}')")
 EOF
 endfunction
 
-function! s:NM_search(search)
-	call s:NM_new_buffer('search')
+function! s:search(search)
+	call s:new_buffer('search')
 ruby << EOF
 	$cur_search = VIM::evaluate('a:search')
 	search_render($cur_search)
 EOF
-	call s:NM_set_menu_buffer()
-	call s:NM_set_map(g:notmuch_rb_search_maps)
-	autocmd CursorMoved <buffer> call s:NM_show_cursor_moved()
+	call s:set_menu_buffer()
+	call s:set_map(g:notmuch_rb_search_maps)
+	autocmd CursorMoved <buffer> call s:show_cursor_moved()
 endfunction
 
-function! s:NM_folders_show_search()
+function! s:folders_show_search()
 ruby << EOF
 	n = VIM::Buffer::current.line_number
 	s = $searches[n - 1]
-	VIM::command("call s:NM_search('#{s}')")
+	VIM::command("call s:search('#{s}')")
 EOF
 endfunction
 
-function! s:NM_folders()
-	call s:NM_new_buffer('folders')
+function! s:folders()
+	call s:new_buffer('folders')
 	ruby folders_render()
-	call s:NM_set_menu_buffer()
-	call s:NM_set_map(g:notmuch_rb_folders_maps)
+	call s:set_menu_buffer()
+	call s:set_map(g:notmuch_rb_folders_maps)
 endfunction
 
 "" root
 
-function! s:NM_set_defaults()
+function! s:set_defaults()
 	if exists('g:notmuch_rb_custom_search_maps')
 		call extend(g:notmuch_rb_search_maps, g:notmuch_rb_custom_search_maps)
 	endif
@@ -264,7 +264,7 @@ function! s:NM_set_defaults()
 endfunction
 
 function! s:NotMuchR()
-	call s:NM_set_defaults()
+	call s:set_defaults()
 
 ruby << EOF
 	require 'notmuch'
@@ -472,7 +472,7 @@ ruby << EOF
 	end
 
 EOF
-	call s:NM_folders()
+	call s:folders()
 endfunction
 
 command NotMuchR :call s:NotMuchR()
