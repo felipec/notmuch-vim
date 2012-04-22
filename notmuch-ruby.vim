@@ -97,12 +97,12 @@ endfunction
 
 "" main
 
-function! s:NM_show(words)
+function! s:NM_show(thread_id)
 	call <SID>NM_new_buffer('show')
 ruby << EOF
 	VIM::Buffer::current.render do |b|
-		words = VIM::evaluate('a:words')
-		q = $db.query(words.join(" "))
+		thread_id = VIM::evaluate('a:thread_id')
+		q = $db.query(thread_id)
 		msgs = q.search_messages
 		msgs.each do |msg|
 			m = Mail.read(msg.filename)
@@ -127,7 +127,7 @@ endfunction
 function! s:NM_search_show_thread()
 ruby << EOF
 	id = get_thread_id
-	VIM::command("call <SID>NM_show(['#{id}'])")
+	VIM::command("call <SID>NM_show('#{id}')")
 EOF
 endfunction
 
