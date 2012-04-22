@@ -408,6 +408,8 @@ ruby << EOF
 			end
 			m.cc = orig[:cc]
 			m.from = VIM::evaluate('g:notmuch_rb_email')
+			m.charset = 'utf-8'
+			m.content_transfer_encoding = '7bit'
 		end
 
 		dir = File.expand_path('~/.notmuch/compose')
@@ -418,17 +420,19 @@ ruby << EOF
 			lines += help_lines
 			lines << ''
 
-			reply.ready_to_send!
-			lines += reply.header.encoded.lines.map { |e| e.chomp }
-			lines << ""
-
-			lines << "%s wrote:" % Mail::Address.new(orig[:from].value).name
+			body_lines = []
+			body_lines << "%s wrote:" % Mail::Address.new(orig[:from].value).name
 			part = orig.find_first_text
 			part.convert.each_line do |l|
-				lines << "> %s" % l.chomp
+				body_lines << "> %s" % l.chomp
 			end
-			lines << ""
-			lines << ""
+			body_lines << ""
+			body_lines << ""
+			body_lines << ""
+
+			reply.body = body_lines.join("\n")
+
+			lines += reply.to_s.lines.map { |e| e.chomp }
 			lines << ""
 
 			old_count = lines.count - 1
