@@ -17,16 +17,16 @@ let g:notmuch_rb_search_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
 	\ '<Enter>':	':call <SID>NM_search_show_thread(1)<CR>',
 	\ '<Space>':	':call <SID>NM_search_show_thread(2)<CR>',
-	\ 'A':		':call <SID>NM_search_mark_read_then_archive_thread()<CR>',
-	\ 'I':		':call <SID>NM_search_mark_read_thread()<CR>',
+	\ 'A':		':call <SID>NM_search_tag("-inbox -unread")<CR>',
+	\ 'I':		':call <SID>NM_search_tag("-unread")<CR>',
 	\ '=':		':call <SID>NM_search_refresh()<CR>',
 	\ '?':		':call <SID>NM_search_info()<CR>',
 	\ }
 
 let g:notmuch_rb_show_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
-	\ 'A':		':call <SID>NM_show_mark_read_then_archive_thread()<CR>',
-	\ 'I':		':call <SID>NM_show_mark_read_thread()<CR>',
+	\ 'A':		':call <SID>NM_show_tag("-inbox -unread")<CR>',
+	\ 'I':		':call <SID>NM_show_tag("-unread")<CR>',
 	\ 'o':		':call <SID>NM_show_open_msg()<CR>',
 	\ 'e':		':call <SID>NM_show_extract_msg()<CR>',
 	\ '?':		':call <SID>NM_show_info()<CR>',
@@ -84,13 +84,8 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:NM_show_mark_read_then_archive_thread()
-	ruby do_tag(get_cur_view, "-inbox -unread")
-	call <SID>NM_show_next_thread()
-endfunction
-
-function! s:NM_show_mark_read_thread()
-	ruby do_tag(get_cur_view, "-unread")
+function! s:NM_show_tag(tags)
+	ruby do_tag(get_cur_view, VIM::evaluate('a:tags'))
 	call <SID>NM_show_next_thread()
 endfunction
 
@@ -104,13 +99,8 @@ function! s:NM_search_refresh()
 	setlocal nomodifiable
 endfunction
 
-function! s:NM_search_mark_read_then_archive_thread()
-	ruby do_tag(get_thread_id, "-inbox -unread")
-	norm j
-endfunction
-
-function! s:NM_search_mark_read_thread()
-	ruby do_tag(get_thread_id, "-unread")
+function! s:NM_search_tag(tags)
+	ruby do_tag(get_thread_id, VIM::evaluate('a:tags'))
 	norm j
 endfunction
 
