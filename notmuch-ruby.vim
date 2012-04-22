@@ -82,7 +82,7 @@ endfunction
 
 function! s:NM_show_tag(tags)
 	ruby do_tag(get_cur_view, VIM::evaluate('a:tags'))
-	call <SID>NM_show_next_thread()
+	call s:NM_show_next_thread()
 endfunction
 
 function! s:NM_search_info()
@@ -119,10 +119,10 @@ EOF
 endfunction
 
 function! s:NM_show_next_thread()
-	call <SID>NM_kill_this_buffer()
+	call s:NM_kill_this_buffer()
 	if line('.') != line('$')
 		norm j
-		call <SID>NM_search_show_thread(0)
+		call s:NM_search_show_thread(0)
 	else
 		echo 'No more messages.'
 	endif
@@ -162,7 +162,7 @@ endfunction
 "" main
 
 function! s:NM_show(thread_id)
-	call <SID>NM_new_buffer('show')
+	call s:NM_new_buffer('show')
 ruby << EOF
 	thread_id = VIM::evaluate('a:thread_id')
 	$cur_thread = thread_id
@@ -200,7 +200,7 @@ ruby << EOF
 		VIM::command("syntax region nmShowMsg#{i}Body start='\\%%%il' end='\\%%%dl' contains=@nmShowMsgBody" % [msg.body_start, msg.end])
 	end
 EOF
-	call <SID>NM_set_map(g:notmuch_rb_show_maps)
+	call s:NM_set_map(g:notmuch_rb_show_maps)
 endfunction
 
 function! s:NM_search_show_thread(mode)
@@ -212,34 +212,34 @@ ruby << EOF
 	when 1; $cur_filter = nil
 	when 2; $cur_filter = $cur_search
 	end
-	VIM::command("call <SID>NM_show('#{id}')")
+	VIM::command("call s:NM_show('#{id}')")
 EOF
 endfunction
 
 function! s:NM_search(search)
-	call <SID>NM_new_buffer('search')
+	call s:NM_new_buffer('search')
 ruby << EOF
 	$cur_search = VIM::evaluate('a:search')
 	search_render($cur_search)
 EOF
-	call <SID>NM_set_menu_buffer()
-	call <SID>NM_set_map(g:notmuch_rb_search_maps)
-	autocmd CursorMoved <buffer> call <SID>NM_show_cursor_moved()
+	call s:NM_set_menu_buffer()
+	call s:NM_set_map(g:notmuch_rb_search_maps)
+	autocmd CursorMoved <buffer> call s:NM_show_cursor_moved()
 endfunction
 
 function! s:NM_folders_show_search()
 ruby << EOF
 	n = VIM::Buffer::current.line_number
 	s = $searches[n - 1]
-	VIM::command("call <SID>NM_search('#{s}')")
+	VIM::command("call s:NM_search('#{s}')")
 EOF
 endfunction
 
 function! s:NM_folders()
-	call <SID>NM_new_buffer('folders')
+	call s:NM_new_buffer('folders')
 	ruby folders_render()
-	call <SID>NM_set_menu_buffer()
-	call <SID>NM_set_map(g:notmuch_rb_folders_maps)
+	call s:NM_set_menu_buffer()
+	call s:NM_set_map(g:notmuch_rb_folders_maps)
 endfunction
 
 "" root
@@ -264,7 +264,7 @@ function! s:NM_set_defaults()
 endfunction
 
 function! s:NotMuchR()
-	call <SID>NM_set_defaults()
+	call s:NM_set_defaults()
 
 ruby << EOF
 	require 'notmuch'
@@ -472,7 +472,7 @@ ruby << EOF
 	end
 
 EOF
-	call <SID>NM_folders()
+	call s:NM_folders()
 endfunction
 
-command NotMuchR :call <SID>NotMuchR()
+command NotMuchR :call s:NotMuchR()
