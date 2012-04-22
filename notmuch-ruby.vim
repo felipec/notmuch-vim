@@ -25,6 +25,7 @@ let g:notmuch_rb_show_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
 	\ 'A':		':call <SID>NM_show_mark_read_then_archive_thread()<CR>',
 	\ 'I':		':call <SID>NM_show_mark_read_thread()<CR>',
+	\ 'o':		':call <SID>NM_show_open_msg()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -35,6 +36,7 @@ let s:notmuch_rb_folders_default = [
 
 let s:notmuch_rb_date_format_default = '%d.%m.%y'
 let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
+let s:notmuch_rb_reader_default = 'terminal -e "mutt -f %s"'
 
 if !exists('g:notmuch_rb_folders')
 	let g:notmuch_rb_folders = s:notmuch_rb_folders_default
@@ -48,7 +50,20 @@ if !exists('g:notmuch_rb_datetime_format')
 	let g:notmuch_rb_datetime_format = s:notmuch_rb_datetime_format_default
 endif
 
+if !exists('g:notmuch_rb_reader')
+	let g:notmuch_rb_reader = s:notmuch_rb_reader_default
+endif
+
 "" actions
+
+function! s:NM_show_open_msg()
+ruby << EOF
+	m = get_message
+	mbox = File.join(ENV['HOME'], ".notmuch/vim_mbox")
+	cmd = VIM::evaluate('g:notmuch_rb_reader') % mbox
+	system "notmuch show --format=mbox id:#{m.message_id} > #{mbox} && #{cmd}"
+EOF
+endfunction
 
 function! s:NM_show_mark_read_then_archive_thread()
 ruby << EOF
@@ -146,6 +161,7 @@ function! s:NM_show(thread_id)
 ruby << EOF
 	thread_id = VIM::evaluate('a:thread_id')
 	$cur_thread = thread_id
+	$messages.clear
 	VIM::Buffer::current.render do |b|
 		do_read do |db|
 			q = db.query(thread_id)
@@ -153,8 +169,11 @@ ruby << EOF
 			msgs.each do |msg|
 				m = Mail.read(msg.filename)
 				part = m.find_first_text
+				nm_m = Message.new(msg)
+				$messages << nm_m
 				date_fmt = VIM::evaluate('g:notmuch_rb_datetime_format')
 				date = Time.at(msg.date).strftime(date_fmt)
+				nm_m.start = b.count
 				b << "%s %s (%s)" % [msg['from'], date, msg.tags]
 				b << "Subject: %s" % [msg['subject']]
 				b << "To: %s" % m['to']
@@ -165,6 +184,7 @@ ruby << EOF
 					b << l.chomp
 				end
 				b << ""
+				nm_m.end = b.count
 			end
 		end
 	end
@@ -218,6 +238,7 @@ ruby << EOF
 	$searches = []
 	$buf_queue = []
 	$threads = []
+	$messages = []
 
 	def vim_p(s)
 		VIM::command("echo '#{s}'")
@@ -235,6 +256,11 @@ ruby << EOF
 	def get_thread_id
 		n = VIM::Buffer::current.line_number - 1
 		return "thread:%s" % $threads[n]
+	end
+
+	def get_message
+		n = VIM::Buffer::current.line_number - 1
+		return $messages.find { |m| n >= m.start && n <= m.end }
 	end
 
 	def do_write
@@ -292,6 +318,17 @@ ruby << EOF
 					end
 				end
 			end
+		end
+	end
+
+	class Message
+		attr_accessor :start, :end
+		attr_reader :message_id, :filename
+		def initialize(msg)
+			@message_id = msg.message_id
+			@filename = msg.filename
+			@start = 0
+			@end = 0
 		end
 	end
 
