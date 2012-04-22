@@ -333,7 +333,7 @@ ruby << EOF
 				folders.each do |name, search|
 					q = db.query(search)
 					$searches << search
-					b << "%9d %-20s (%s)" % [q.search_threads.count, name, search]
+					b << "%9d %-20s (%s)" % [q.search_messages.count, name, search]
 				end
 			end
 		end
