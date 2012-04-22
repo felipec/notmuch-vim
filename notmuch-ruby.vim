@@ -17,6 +17,7 @@ let g:notmuch_rb_search_maps = {
 	\ '<Enter>':	':call <SID>NM_search_show_thread()<CR>',
 	\ 'A':		':call <SID>NM_search_mark_read_then_archive_thread()<CR>',
 	\ 'I':		':call <SID>NM_search_mark_read_thread()<CR>',
+	\ '=':		':call <SID>NM_search_refresh()<CR>',
 	\ }
 
 let g:notmuch_rb_show_maps = {
@@ -60,6 +61,14 @@ ruby << EOF
 	do_tag($cur_thread, "-unread")
 EOF
 	call <SID>NM_show_next_thread()
+endfunction
+
+function! s:NM_search_refresh()
+	setlocal modifiable
+ruby << EOF
+	search_render($cur_search)
+EOF
+	setlocal nomodifiable
 endfunction
 
 function! s:NM_search_mark_read_then_archive_thread()
@@ -164,8 +173,8 @@ endfunction
 function! s:NM_search(words)
 	call <SID>NM_new_buffer('search')
 ruby << EOF
-	search = VIM::evaluate('a:words')
-	search_render(search)
+	$cur_search = VIM::evaluate('a:words')
+	search_render($cur_search)
 EOF
 	call <SID>NM_set_menu_buffer()
 	call <SID>NM_set_map(g:notmuch_rb_search_maps)
@@ -278,8 +287,11 @@ ruby << EOF
 			append(count(), a)
 		end
 		def render
+			old_count = count
 			yield self
-			delete(1)
+			(1..old_count).each do
+				delete(1)
+			end
 		end
 	end
 
