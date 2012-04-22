@@ -343,7 +343,8 @@ ruby << EOF
 			items.each do |e|
 				authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
 				date = Time.at(e.newest_date).strftime(date_fmt)
-				b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.matched_messages, authors, e.subject, e.tags]
+				subject = Mail::Field.new("Subject: " + e.subject).to_s
+				b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.matched_messages, authors, subject, e.tags]
 				$threads << e.thread_id
 			end
 		end
