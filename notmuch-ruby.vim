@@ -15,7 +15,8 @@ let g:notmuch_rb_folders_maps = {
 
 let g:notmuch_rb_search_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
-	\ '<Enter>':	':call <SID>NM_search_show_thread()<CR>',
+	\ '<Enter>':	':call <SID>NM_search_show_thread(1)<CR>',
+	\ '<Space>':	':call <SID>NM_search_show_thread(2)<CR>',
 	\ 'A':		':call <SID>NM_search_mark_read_then_archive_thread()<CR>',
 	\ 'I':		':call <SID>NM_search_mark_read_thread()<CR>',
 	\ '=':		':call <SID>NM_search_refresh()<CR>',
@@ -79,14 +80,14 @@ endfunction
 
 function! s:NM_show_mark_read_then_archive_thread()
 ruby << EOF
-	do_tag($cur_thread, "-inbox -unread")
+	do_tag(get_cur_view, "-inbox -unread")
 EOF
 	call <SID>NM_show_next_thread()
 endfunction
 
 function! s:NM_show_mark_read_thread()
 ruby << EOF
-	do_tag($cur_thread, "-unread")
+	do_tag(get_cur_view, "-unread")
 EOF
 	call <SID>NM_show_next_thread()
 endfunction
@@ -127,7 +128,7 @@ function! s:NM_show_next_thread()
 	call <SID>NM_kill_this_buffer()
 	if line('.') != line('$')
 		norm j
-		call <SID>NM_search_show_thread()
+		call <SID>NM_search_show_thread(0)
 	else
 		echo 'No more messages.'
 	endif
@@ -176,7 +177,7 @@ ruby << EOF
 	$messages.clear
 	VIM::Buffer::current.render do |b|
 		do_read do |db|
-			q = db.query(thread_id)
+			q = db.query(get_cur_view)
 			msgs = q.search_messages
 			msgs.each do |msg|
 				m = Mail.read(msg.filename)
@@ -210,9 +211,15 @@ EOF
 	call <SID>NM_set_map(g:notmuch_rb_show_maps)
 endfunction
 
-function! s:NM_search_show_thread()
+function! s:NM_search_show_thread(mode)
 ruby << EOF
+	mode = VIM::evaluate('a:mode')
 	id = get_thread_id
+	case mode
+	when 0;
+	when 1; $cur_filter = nil
+	when 2; $cur_filter = $cur_search
+	end
 	VIM::command("call <SID>NM_show('#{id}')")
 EOF
 endfunction
@@ -279,6 +286,14 @@ ruby << EOF
 	def get_message
 		n = VIM::Buffer::current.line_number - 1
 		return $messages.find { |m| n >= m.start && n <= m.end }
+	end
+
+	def get_cur_view
+		if $cur_filter
+			return "#{$cur_thread} and (#{$cur_filter})"
+		else
+			return $cur_thread
+		end
 	end
 
 	def do_write
