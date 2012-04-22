@@ -21,6 +21,8 @@ let g:notmuch_rb_search_maps = {
 
 let g:notmuch_rb_show_maps = {
 	\ 'q':		':call <SID>NM_kill_this_buffer()<CR>',
+	\ 'A':		':call <SID>NM_show_mark_read_then_archive_thread()<CR>',
+	\ 'I':		':call <SID>NM_show_mark_read_thread()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -46,6 +48,20 @@ endif
 
 "" actions
 
+function! s:NM_show_mark_read_then_archive_thread()
+ruby << EOF
+	do_tag($cur_thread, "-inbox -unread")
+EOF
+	call <SID>NM_show_next_thread()
+endfunction
+
+function! s:NM_show_mark_read_thread()
+ruby << EOF
+	do_tag($cur_thread, "-unread")
+EOF
+	call <SID>NM_show_next_thread()
+endfunction
+
 function! s:NM_search_mark_read_then_archive_thread()
 ruby << EOF
 	do_tag(get_thread_id, "-inbox -unread")
@@ -61,6 +77,16 @@ EOF
 endfunction
 
 "" basic
+
+function! s:NM_show_next_thread()
+	call <SID>NM_kill_this_buffer()
+	if line('.') != line('$')
+		norm j
+		call <SID>NM_search_show_thread()
+	else
+		echo 'No more messages.'
+	endif
+endfunction
 
 function! s:NM_kill_this_buffer()
 	bdelete!
@@ -100,8 +126,9 @@ endfunction
 function! s:NM_show(thread_id)
 	call <SID>NM_new_buffer('show')
 ruby << EOF
+	thread_id = VIM::evaluate('a:thread_id')
+	$cur_thread = thread_id
 	VIM::Buffer::current.render do |b|
-		thread_id = VIM::evaluate('a:thread_id')
 		q = $db.query(thread_id)
 		msgs = q.search_messages
 		msgs.each do |msg|
