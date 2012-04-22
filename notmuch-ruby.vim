@@ -10,6 +10,7 @@ let g:loaded_notmuch_rb = "yep"
 
 let g:notmuch_rb_folders_maps = {
 	\ '<Enter>':	':call <SID>NM_folders_show_search()<CR>',
+	\ '=':		':call <SID>NM_folders_refresh()<CR>',
 	\ }
 
 let g:notmuch_rb_search_maps = {
@@ -83,6 +84,14 @@ ruby << EOF
 	do_tag(get_thread_id, "-unread")
 EOF
 	norm j
+endfunction
+
+function! s:NM_folders_refresh()
+	setlocal modifiable
+ruby << EOF
+	folders_render()
+EOF
+	setlocal nomodifiable
 endfunction
 
 "" basic
@@ -191,17 +200,7 @@ endfunction
 function! s:NM_folders()
 	call <SID>NM_new_buffer('folders')
 ruby << EOF
-	VIM::Buffer::current.render do |b|
-		folders = VIM::evaluate('g:notmuch_rb_folders')
-		$searches.clear
-		do_read do |db|
-			folders.each do |name, search|
-				q = db.query(search)
-				$searches << search
-				b << "%9d %-20s (%s)" % [q.search_threads.count, name, search]
-			end
-		end
-	end
+	folders_render()
 EOF
 	call <SID>NM_set_menu_buffer()
 	call <SID>NM_set_map(g:notmuch_rb_folders_maps)
@@ -248,6 +247,20 @@ ruby << EOF
 		db = Notmuch::Database.new($db_name)
 		yield db
 		db.close
+	end
+
+	def folders_render()
+		VIM::Buffer::current.render do |b|
+			folders = VIM::evaluate('g:notmuch_rb_folders')
+			$searches.clear
+			do_read do |db|
+				folders.each do |name, search|
+					q = db.query(search)
+					$searches << search
+					b << "%9d %-20s (%s)" % [q.search_threads.count, name, search]
+				end
+			end
+		end
 	end
 
 	def search_render(search)
