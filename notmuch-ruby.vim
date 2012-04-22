@@ -138,7 +138,7 @@ endfunction
 function! s:show_open_msg()
 ruby << EOF
 	m = get_message
-	mbox = File.join(ENV['HOME'], ".notmuch/vim_mbox")
+	mbox = File.expand_path('~/.notmuch/vim_mbox')
 	cmd = VIM::evaluate('g:notmuch_rb_reader') % mbox
 	system "notmuch show --format=mbox id:#{m.message_id} > #{mbox} && #{cmd}"
 EOF
