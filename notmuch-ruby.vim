@@ -20,6 +20,7 @@ let g:notmuch_rb_search_maps = {
 	\ 'A':		':call <SID>NM_search_mark_read_then_archive_thread()<CR>',
 	\ 'I':		':call <SID>NM_search_mark_read_thread()<CR>',
 	\ '=':		':call <SID>NM_search_refresh()<CR>',
+	\ '?':		':call <SID>NM_search_info()<CR>',
 	\ }
 
 let g:notmuch_rb_show_maps = {
@@ -28,6 +29,7 @@ let g:notmuch_rb_show_maps = {
 	\ 'I':		':call <SID>NM_show_mark_read_thread()<CR>',
 	\ 'o':		':call <SID>NM_show_open_msg()<CR>',
 	\ 'e':		':call <SID>NM_show_extract_msg()<CR>',
+	\ '?':		':call <SID>NM_show_info()<CR>',
 	\ }
 
 let s:notmuch_rb_folders_default = [
@@ -57,6 +59,12 @@ if !exists('g:notmuch_rb_reader')
 endif
 
 "" actions
+
+function! s:NM_show_info()
+ruby << EOF
+	vim_puts get_message.inspect
+EOF
+endfunction
 
 function! s:NM_show_extract_msg()
 ruby << EOF
@@ -90,6 +98,12 @@ ruby << EOF
 	do_tag(get_cur_view, "-unread")
 EOF
 	call <SID>NM_show_next_thread()
+endfunction
+
+function! s:NM_search_info()
+ruby << EOF
+	vim_puts get_thread_id
+EOF
 endfunction
 
 function! s:NM_search_refresh()
@@ -380,6 +394,14 @@ ruby << EOF
 			@mail = mail
 			@start = 0
 			@end = 0
+		end
+
+		def to_s
+			"id:%s" % @message_id
+		end
+
+		def inspect
+			"id:%s, file:%s" % [@message_id, @filename]
 		end
 	end
 
