@@ -10,6 +10,7 @@ let g:loaded_notmuch_rb = "yep"
 
 let g:notmuch_rb_folders_maps = {
 	\ '<Enter>':	'folders_show_search()',
+	\ 's':		'folders_search_prompt()',
 	\ '=':		'folders_refresh()',
 	\ }
 
@@ -98,6 +99,11 @@ endfunction
 function! s:search_tag(tags)
 	ruby do_tag(get_thread_id, VIM::evaluate('a:tags'))
 	norm j
+endfunction
+
+function! s:folders_search_prompt()
+        let text = input('Search: ')
+        call s:search(text)
 endfunction
 
 function! s:folders_refresh()
