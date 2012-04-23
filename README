@@ -74,14 +74,6 @@ Then just copy notmuch-ruby.vim to ~/.vim/plugins/notmuch-ruby.vim.
 You can grab it from here:
 https://raw.github.com/felipec/notmuch-vim-ruby/master/notmuch-ruby.vim
 
-Before firing it up, there's only one configuration that is absolutely needed; the location of your desired database.
-
-So add something like this in your .vimrc:
-
- let g:notmuch_rb_database = '/home/felipec/mail'
-
-You can check the actual path in your '~/.notmuch-config'
-
 That's it just, fire it up!
 
  % gvim -c ':NotMuchR'
