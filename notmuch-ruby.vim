@@ -406,14 +406,20 @@ ruby << EOF
 
 	def do_write
 		db = Notmuch::Database.new($db_name, :mode => Notmuch::MODE_READ_WRITE)
-		yield db
-		db.close
+		begin
+			yield db
+		ensure
+			db.close
+		end
 	end
 
 	def do_read
 		db = Notmuch::Database.new($db_name)
-		yield db
-		db.close
+		begin
+			yield db
+		ensure
+			db.close
+		end
 	end
 
 	def open_reply(orig)
