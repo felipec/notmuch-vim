@@ -342,11 +342,32 @@ ruby << EOF
 	require 'mail'
 	require 'tempfile'
 
-	$db_name = VIM::evaluate('g:notmuch_rb_database')
+	$db_name = nil
+	$email_address = nil
 	$searches = []
 	$buf_queue = []
 	$threads = []
 	$messages = []
+	$config = {}
+
+	def get_config
+		group = nil
+		File.readlines(File.expand_path('~/.notmuch-config')).each do |l|
+			l.chomp!
+			case l
+			when /^\[(.*)\]$/
+				group = $1
+			when ''
+			when /^(.*)=(.*)$/
+				key = "%s.%s" % [group, $1]
+				value = $2
+				$config[key] = value
+			end
+		end
+
+		$db_name = $config['database.path']
+		$email_address = "%s <%s>" % [$config['user.name'], $config['user.primary_email']]
+	end
 
 	def vim_puts(s)
 		VIM::command("echo '#{s.to_s}'")
@@ -407,7 +428,7 @@ ruby << EOF
 				m.to = [orig[:from].to_s, orig[:to].to_s]
 			end
 			m.cc = orig[:cc]
-			m.from = VIM::evaluate('g:notmuch_rb_email')
+			m.from = $email_address
 			m.charset = 'utf-8'
 			m.content_transfer_encoding = '7bit'
 		end
@@ -599,6 +620,7 @@ ruby << EOF
 		end
 	end
 
+	get_config
 EOF
 	call s:folders()
 endfunction
