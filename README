@@ -34,19 +34,22 @@ add a few flags, so you don't have to export LD_LIBRARY_PATH all the time.
 
  % make LOCAL_LIBS='-Wl,--enable-new-dtags -Wl,-rpath,/opt/notmuch/lib'
 
-If you don't want to mess with you system, you can just copy the .so file to any place you want, but make sure you export the RUBYLIB variable to that place.
+If you don't want to mess with you system, you can just copy the .so file to
+any place you want, but make sure you export the RUBYLIB variable to point
+there.
 
 You should now be able to run
 
  % ruby -e "require 'notmuch'"
 
-cleanly. If you don't see any errors it means it's working :)
+cleanly. If you don't see any errors, it means it's working :)
 
 === mail gem ===
 
-Since libnotmuch library concentrates on things other than handling mail. And
-the best library for that is called 'mail'. The easiest way to install it is
-with ruby's gem. In most distro's the package is called 'rubygems'.
+Since libnotmuch library concentrates on things other than handling mail, we
+need a library to do that, and for Ruby the best library for that is called
+'mail'. The easiest way to install it is with ruby's gem. In most distro's the
+package is called 'rubygems'.
 
 Once you have gem, run:
 
@@ -68,10 +71,6 @@ build complains).
 
 Then just copy notmuch-ruby.vim to ~/.vim/plugins/notmuch-ruby.vim.
 
-If you have the notmuch source code available, just go to the 'vim' directory
-and type 'make install' (make sure you create the missing directories if the
-build complains).
-
 You can grab it from here:
 https://raw.github.com/felipec/notmuch-vim-ruby/master/notmuch-ruby.vim
 
@@ -83,7 +82,7 @@ So add something like this in your .vimrc:
 
 You can check the actual path in your '~/.notmuch-config'
 
-That's just, fire it up!
+That's it just, fire it up!
 
  % gvim -c ':NotMuchR'
 
