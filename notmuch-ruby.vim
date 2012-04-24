@@ -233,6 +233,7 @@ endfunction
 
 function! s:show(thread_id)
 	call s:new_buffer('show')
+	setlocal modifiable
 ruby << EOF
 	thread_id = VIM::evaluate('a:thread_id')
 	$cur_thread = thread_id
@@ -271,6 +272,7 @@ ruby << EOF
 		VIM::command("syntax region nmShowMsg#{i}Body start='\\%%%il' end='\\%%%dl' contains=@nmShowMsgBody" % [msg.body_start, msg.end])
 	end
 EOF
+	setlocal nomodifiable
 	call s:set_map(g:notmuch_rb_show_maps)
 endfunction
 
