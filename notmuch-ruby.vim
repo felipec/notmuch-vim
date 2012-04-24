@@ -240,6 +240,7 @@ ruby << EOF
 	$curbuf.render do |b|
 		do_read do |db|
 			q = db.query(get_cur_view)
+			q.sort = 0
 			msgs = q.search_messages
 			msgs.each do |msg|
 				m = Mail.read(msg.filename)
