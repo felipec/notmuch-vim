@@ -1,10 +1,10 @@
 == notmuch vim ruby ==
 
-This is a plug-in that a fully usable mail client through vim, as a plug-in,
+This is a vim plug-in that provides a fully usable mail client interface,
 utilizing the notmuch framework, through it's ruby bindings.
 
 It aims to provide a familiar experience for the people already using the
-existing vim plug-in in notmuch source repository, but with more features.
+existing vim plug-in in notmuch, but with more features.
 
 == features ==
 
