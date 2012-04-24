@@ -519,6 +519,7 @@ ruby << EOF
 		do_write do |db|
 			q = db.query(filter)
 			q.search_messages.each do |e|
+				e.freeze
 				tags.split.each do |t|
 					case t
 					when /^-(.*)/
@@ -527,6 +528,8 @@ ruby << EOF
 						e.add_tag($1)
 					end
 				end
+				e.thaw
+				e.tags_to_maildir_flags
 			end
 		end
 	end
