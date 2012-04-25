@@ -395,7 +395,7 @@ ruby << EOF
 	end
 
 	def get_message
-		n = $curbuf.line_number - 1
+		n = $curbuf.line_number
 		return $messages.find { |m| n >= m.start && n <= m.end }
 	end
 
