@@ -620,10 +620,11 @@ ruby << EOF
 		end
 
 		def convert
-			text = decoded
-			if mime_type == "text/html"
+			if mime_type != "text/html"
+				text = decoded
+			else
 				IO.popen("elinks --dump", "w+") do |pipe|
-					pipe.write(text)
+					pipe.write(decode_body)
 					pipe.close_write
 					text = pipe.read
 				end
