@@ -20,6 +20,7 @@ let g:notmuch_rb_search_maps = {
 	\ '<Space>':	'search_show_thread(2)',
 	\ 'A':		'search_tag("-inbox -unread")',
 	\ 'I':		'search_tag("-unread")',
+	\ 's':		'search_search_prompt()',
 	\ '=':		'search_refresh()',
 	\ '?':		'search_info()',
 	\ }
@@ -163,6 +164,16 @@ endfunction
 function! s:show_tag(tags)
 	ruby do_tag(get_cur_view, VIM::evaluate('a:tags'))
 	call s:show_next_thread()
+endfunction
+
+function! s:search_search_prompt()
+	let text = input('Search: ')
+	setlocal modifiable
+ruby << EOF
+	$cur_search = VIM::evaluate('text')
+	search_render($cur_search)
+EOF
+	setlocal nomodifiable
 endfunction
 
 function! s:search_info()
