@@ -32,6 +32,7 @@ let g:notmuch_rb_show_maps = {
 	\ 'e':		'show_extract_msg()',
 	\ 'r':		'show_reply()',
 	\ '?':		'show_info()',
+	\ '<Tab>':	'show_next_msg()',
 	\ }
 
 let g:notmuch_rb_compose_maps = {
@@ -108,6 +109,20 @@ function! s:compose_send()
 	call delete(fname)
 	echo 'Mail sent successfully.'
 	call s:kill_this_buffer()
+endfunction
+
+function! s:show_next_msg()
+ruby << EOF
+	r, c = $curwin.cursor
+	n = $curbuf.line_number
+	i = $messages.index { |m| n >= m.start && n <= m.end }
+	m = $messages[i + 1]
+	if m
+		r = m.body_start + 1
+		VIM::command("normal #{m.start}zt")
+		$curwin.cursor = r, c
+	end
+EOF
 endfunction
 
 function! s:show_reply()
