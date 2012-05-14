@@ -21,6 +21,11 @@ existing vim plug-in in notmuch, but with more features.
 
 == install ==
 
+=== vim +ruby ===
+
+First of all make sure your vim version has ruby support: check for +ruby in
+'vim --version' features.
+
 === ruby bindings ===
 
 Go to notmuch source code, and then 'bindings/ruby':
