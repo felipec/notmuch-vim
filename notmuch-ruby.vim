@@ -130,6 +130,7 @@ ruby << EOF
 	m.mail.attachments.each do |a|
 		File.open(a.filename, 'w') do |f|
 			f.write a.body.decoded
+			print "Extracted '#{a.filename}'"
 		end
 	end
 EOF
