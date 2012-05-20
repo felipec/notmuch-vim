@@ -383,7 +383,7 @@ ruby << EOF
 	def get_config
 		group = nil
 		config = ENV['NOTMUCH_CONFIG'] || '~/.notmuch-config'
-		File.readlines(File.expand_path(config)).each do |l|
+		File.open(File.expand_path(config)).each do |l|
 			l.chomp!
 			case l
 			when /^\[(.*)\]$/
