@@ -234,7 +234,7 @@ EOF
 endfunction
 
 function! s:set_map(maps)
-	nmapclear
+	nmapclear <buffer>
 	for [key, code] in items(a:maps)
 		let cmd = printf(":call <SID>%s<CR>", code)
 		exec printf('nnoremap <buffer> %s %s', key, cmd)
