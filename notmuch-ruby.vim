@@ -106,7 +106,11 @@ function! s:compose_send()
 		echohl None
 		return
 	endif
-	call delete(fname)
+    call delete(fname)
+    " localtime() . '.' . delivery . '.' . hostname() . ':2,S'
+    " g:notmuch_fcc_maildir = cur/
+    "let maildirname = g:notmuch_fcc_maildir . '.' . hostname() . '
+	"call rename(fname, '/tmp/fooname')
 	echo 'Mail sent successfully.'
 	call s:kill_this_buffer()
 endfunction
