@@ -672,3 +672,5 @@ EOF
 endfunction
 
 command NotMuchR :call s:NotMuchR()
+
+" vim: set noexpandtab:
