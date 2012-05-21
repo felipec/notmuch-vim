@@ -49,7 +49,7 @@ let s:notmuch_rb_folders_default = [
 
 let s:notmuch_rb_date_format_default = '%d.%m.%y'
 let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
-let s:notmuch_rb_reader_default = 'terminal -e "mutt -f %s"'
+let s:notmuch_rb_reader_default = 'mutt -f %s'
 
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
