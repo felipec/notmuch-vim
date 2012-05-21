@@ -74,8 +74,7 @@ function! s:compose_unload()
 	if b:compose_done
 		return
 	endif
-	let text = input('[s]end/[q]uit? ')
-	if text =~ '^s'
+	if input('[s]end/[q]uit? ') =~ '^s'
 		call s:compose_send()
 	endif
 endfunction
