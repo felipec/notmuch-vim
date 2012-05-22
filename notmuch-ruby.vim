@@ -290,6 +290,7 @@ ruby << EOF
 				b << ""
 				nm_m.end = b.count
 			end
+			b.delete(b.count)
 		end
 	end
 	$messages.each_with_index do |msg, i|
