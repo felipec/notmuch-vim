@@ -512,6 +512,7 @@ ruby << EOF
 			VIM::command("let s:reply_from='%s'" % reply.from.first.to_s)
 			VIM::command("call s:new_file_buffer('compose', '#{f.path}')")
 			VIM::command("call cursor(#{old_count}, 0)")
+			VIM::command("set spell spelllang=en_gb")
 		end
 	end
 
