@@ -483,7 +483,7 @@ ruby << EOF
 			lines << ''
 
 			body_lines = []
-			body_lines << "%s wrote:" % Mail::Address.new(orig[:from].value)
+			body_lines << "%s wrote on %s:" % [ Mail::Address.new(orig[:from].value), orig[:date.to_s] ]
 			part = orig.find_first_text
 			part.convert.each_line do |l|
 				body_lines << "> %s" % l.chomp
