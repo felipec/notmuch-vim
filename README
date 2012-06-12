@@ -74,7 +74,7 @@ If you have the notmuch source code available, just go to the 'vim' directory
 and type 'make install' (make sure you create the missing directories if the
 build complains).
 
-Then just copy notmuch-ruby.vim to ~/.vim/plugins/notmuch-ruby.vim.
+Then just copy notmuch-ruby.vim to ~/.vim/plugin/notmuch-ruby.vim.
 
 You can grab it from here:
 https://raw.github.com/felipec/notmuch-vim-ruby/master/notmuch-ruby.vim
