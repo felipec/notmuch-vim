@@ -49,7 +49,7 @@ let s:notmuch_rb_folders_default = [
 
 let s:notmuch_rb_date_format_default = '%d.%m.%y'
 let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
-let s:notmuch_rb_reader_default = 'terminal -e "mutt -f %s"'
+let s:notmuch_rb_reader_default = 'mutt -f %s'
 
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
@@ -106,7 +106,11 @@ function! s:compose_send()
 		echohl None
 		return
 	endif
-	call delete(fname)
+    call delete(fname)
+    " localtime() . '.' . delivery . '.' . hostname() . ':2,S'
+    " g:notmuch_fcc_maildir = cur/
+    "let maildirname = g:notmuch_fcc_maildir . '.' . hostname() . '
+	"call rename(fname, '/tmp/fooname')
 	echo 'Mail sent successfully.'
 	call s:kill_this_buffer()
 endfunction
@@ -479,7 +483,7 @@ ruby << EOF
 			lines << ''
 
 			body_lines = []
-			body_lines << "%s wrote:" % Mail::Address.new(orig[:from].value).name
+			body_lines << "%s wrote on %s:" % [ Mail::Address.new(orig[:from].value), orig[:date.to_s] ]
 			part = orig.find_first_text
 			part.convert.each_line do |l|
 				body_lines << "> %s" % l.chomp
@@ -508,6 +512,7 @@ ruby << EOF
 			VIM::command("let s:reply_from='%s'" % reply.from.first.to_s)
 			VIM::command("call s:new_file_buffer('compose', '#{f.path}')")
 			VIM::command("call cursor(#{old_count}, 0)")
+			VIM::command("set spell spelllang=en_gb")
 		end
 	end
 
@@ -651,7 +656,7 @@ ruby << EOF
 			if mime_type != "text/html"
 				text = decoded
 			else
-				IO.popen("elinks --dump", "w+") do |pipe|
+				IO.popen("w3m -T text/html -dump", "w+") do |pipe|
 					pipe.write(decode_body)
 					pipe.close_write
 					text = pipe.read
