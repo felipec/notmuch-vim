@@ -566,6 +566,8 @@ ruby << EOF
 						e.remove_tag($1)
 					when /^\+(.*)/
 						e.add_tag($1)
+					when /^([^\+^-].*)/
+						e.add_tag($1)
 					end
 				end
 				e.thaw
