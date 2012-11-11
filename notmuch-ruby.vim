@@ -200,6 +200,7 @@ function! s:search_tag(intags)
 	endif
 	ruby do_tag(get_thread_id, VIM::evaluate('l:tags'))
 	norm j
+	call s:search_refresh()
 endfunction
 
 function! s:folders_search_prompt()
