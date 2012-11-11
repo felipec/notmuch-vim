@@ -20,6 +20,7 @@ let g:notmuch_rb_search_maps = {
 	\ '<Space>':	'search_show_thread(2)',
 	\ 'A':		'search_tag("-inbox -unread")',
 	\ 'I':		'search_tag("-unread")',
+	\ 't':		'search_tag("")',
 	\ 's':		'search_search_prompt()',
 	\ '=':		'search_refresh()',
 	\ '?':		'search_info()',
@@ -29,6 +30,7 @@ let g:notmuch_rb_show_maps = {
 	\ 'q':		'kill_this_buffer()',
 	\ 'A':		'show_tag("-inbox -unread")',
 	\ 'I':		'show_tag("-unread")',
+	\ 't':		'show_tag("")',
 	\ 'o':		'show_open_msg()',
 	\ 'e':		'show_extract_msg()',
 	\ 'r':		'show_reply()',
@@ -160,8 +162,13 @@ ruby << EOF
 EOF
 endfunction
 
-function! s:show_tag(tags)
-	ruby do_tag(get_cur_view, VIM::evaluate('a:tags'))
+function! s:show_tag(intags)
+	if empty(a:intags)
+		let tags = input('tags: ')
+	else
+		let tags = a:intags
+	endif
+	ruby do_tag(get_cur_view, VIM::evaluate('l:tags'))
 	call s:show_next_thread()
 endfunction
 
@@ -185,8 +192,13 @@ function! s:search_refresh()
 	setlocal nomodifiable
 endfunction
 
-function! s:search_tag(tags)
-	ruby do_tag(get_thread_id, VIM::evaluate('a:tags'))
+function! s:search_tag(intags)
+	if empty(a:intags)
+		let tags = input('tags: ')
+	else
+		let tags = a:intags
+	endif
+	ruby do_tag(get_thread_id, VIM::evaluate('l:tags'))
 	norm j
 endfunction
 
