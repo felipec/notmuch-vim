@@ -53,6 +53,7 @@ let s:notmuch_rb_folders_default = [
 let s:notmuch_rb_date_format_default = '%d.%m.%y'
 let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
 let s:notmuch_rb_reader_default = 'terminal -e "mutt -f %s"'
+let s:notmuch_rb_sendmail_default = '/usr/sbin/sendmail'
 
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
@@ -64,6 +65,10 @@ endif
 
 if !exists('g:notmuch_rb_reader')
 	let g:notmuch_rb_reader = s:notmuch_rb_reader_default
+endif
+
+if !exists('g:notmuch_rb_sendmail')
+	let g:notmuch_rb_sendmail = s:notmuch_rb_sendmail_default
 endif
 
 function! s:new_file_buffer(type, fname)
