@@ -54,6 +54,7 @@ let s:notmuch_rb_date_format_default = '%d.%m.%y'
 let s:notmuch_rb_datetime_format_default = '%d.%m.%y %H:%M:%S'
 let s:notmuch_rb_reader_default = 'terminal -e "mutt -f %s"'
 let s:notmuch_rb_sendmail_default = '/usr/sbin/sendmail'
+let s:notmuch_rb_folders_count_threads_default = 0
 
 if !exists('g:notmuch_rb_date_format')
 	let g:notmuch_rb_date_format = s:notmuch_rb_date_format_default
@@ -69,6 +70,10 @@ endif
 
 if !exists('g:notmuch_rb_sendmail')
 	let g:notmuch_rb_sendmail = s:notmuch_rb_sendmail_default
+endif
+
+if !exists('g:notmuch_rb_folders_count_threads')
+	let g:notmuch_rb_folders_count_threads = s:notmuch_rb_folders_count_threads_default
 endif
 
 function! s:new_file_buffer(type, fname)
@@ -546,12 +551,14 @@ ruby << EOF
 	def folders_render()
 		$curbuf.render do |b|
 			folders = VIM::evaluate('g:notmuch_rb_folders')
+			count_threads = VIM::evaluate('g:notmuch_rb_folders_count_threads')
 			$searches.clear
 			do_read do |db|
 				folders.each do |name, search|
 					q = db.query(search)
 					$searches << search
-					b << "%9d %-20s (%s)" % [q.search_messages.count, name, search]
+					count = count_threads ? q.search_threads.count : q.search_messages.count
+					b << "%9d %-20s (%s)" % [count, name, search]
 				end
 			end
 		end
