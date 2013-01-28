@@ -502,7 +502,11 @@ ruby << EOF
 			lines << ''
 
 			body_lines = []
-			body_lines << "%s wrote:" % Mail::Address.new(orig[:from].value).name
+			addr = Mail::Address.new(orig[:from].value)
+			name = addr.name
+			name = addr.local + "@" if name.nil? && !addr.local.nil?
+			name = "somebody" if name.nil?
+			body_lines << "%s wrote:" % name
 			part = orig.find_first_text
 			part.convert.each_line do |l|
 				body_lines << "> %s" % l.chomp
