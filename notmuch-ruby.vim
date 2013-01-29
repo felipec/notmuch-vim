@@ -139,10 +139,8 @@ EOF
 endfunction
 
 function! s:show_reply()
+	ruby open_reply get_message.mail
 	let b:compose_done = 0
-ruby << EOF
-	open_reply(get_message.mail)
-EOF
 	call s:set_map(g:notmuch_rb_compose_maps)
 	autocmd BufUnload <buffer> call s:compose_unload()
 	startinsert!
