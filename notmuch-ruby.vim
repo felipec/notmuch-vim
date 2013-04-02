@@ -33,6 +33,7 @@ let g:notmuch_rb_show_maps = {
 	\ 't':		'show_tag("")',
 	\ 'o':		'show_open_msg()',
 	\ 'e':		'show_extract_msg()',
+	\ 's':		'show_save_msg()',
 	\ 'r':		'show_reply()',
 	\ '?':		'show_info()',
 	\ '<Tab>':	'show_next_msg()',
@@ -159,6 +160,15 @@ ruby << EOF
 	mbox = File.expand_path('~/.notmuch/vim_mbox')
 	cmd = VIM::evaluate('g:notmuch_rb_reader') % mbox
 	system "notmuch show --format=mbox id:#{m.message_id} > #{mbox} && #{cmd}"
+EOF
+endfunction
+
+function! s:show_save_msg()
+	let file = input('File name: ')
+ruby << EOF
+	file = VIM::evaluate('file')
+	m = get_message
+	system "notmuch show --format=mbox id:#{m.message_id} > #{file}"
 EOF
 endfunction
 
