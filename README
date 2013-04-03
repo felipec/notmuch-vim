@@ -21,9 +21,14 @@ Check if you are able to run the following command cleanly:
 If you don't see any errors, it means it's working and you can go to the next
 section.
 
-If it's not, you would need to compile it. An easy way to do that is with:
+If it's not, you would need to compile it. An easy way to do that is by
+downloading notmuch's source code:
 
- % make build notmuch=~/dev/notmuch
+ % git clone --branch=0.15.2 git://notmuchmail.org/git/notmuch ~/notmuch
+
+And then:
+
+ % make build notmuch=~/notmuch
 
 (Note: you need to specify the notmuch source directory)
 
