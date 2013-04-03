@@ -3,28 +3,14 @@
 This is a vim plug-in that provides a fully usable mail client interface,
 utilizing the notmuch framework, through it's ruby bindings.
 
-It aims to provide a familiar experience for the people already using the
-existing vim plug-in in notmuch, but with more features.
-
-== features ==
-
- * Most of the basic features of the current plug-in
- * Gradual searches; you don't have to wait for the whole search to finish,
-   sort of like the 'less' command
- * Proper multi-part handling; finds out if there's text/plain, or if
-   text/html, converts it using elinks.
- * Extract all attachments
- * Open message with mutt (or any external application that can open an mbox)
- * More proper UTF-8 handling
- * Configurable key mappings
- * Much simpler, cleaner, beautiful, and extensible code (only 600 lines!)
-
 == install ==
+
+Simply run 'make install'. However, check that you have the depencies below.
 
 === vim +ruby ===
 
-First of all make sure your vim version has ruby support: check for +ruby in
-'vim --version' features.
+Make sure your vim version has ruby support: check for +ruby in 'vim --version'
+features.
 
 === ruby bindings ===
 
@@ -35,21 +21,11 @@ Check if you are able to run the following command cleanly:
 If you don't see any errors, it means it's working and you can go to the next
 section.
 
-If it's not, you would need to compile it. Go to notmuch source code, and then
-'bindings/ruby':
+If it's not, you would need to compile it. An easy way to do that is with:
 
- % ruby extconf.rb
- % make
- % sudo make install
+ % make build notmuch=~/dev/notmuch
 
-If you have installed libnotmuch in a non-standard location, you might want to
-add a few flags, so you don't have to export LD_LIBRARY_PATH all the time.
-
- % make LOCAL_LIBS='-Wl,--enable-new-dtags -Wl,-rpath,/opt/notmuch/lib'
-
-If you don't want to mess with you system, you can just copy the .so file to
-any place you want, but make sure you export the RUBYLIB variable to point
-there.
+(Note: you need to specify the notmuch source directory)
 
 === mail gem ===
 
@@ -65,23 +41,11 @@ Once you have gem, run:
 In some systems gems are installed on a per-user basis by default, so make sure
 you are running as the same user as the one that installed them.
 
-=== actual vim plugin ===
+This gem is not mandatory, but it's extremely recommended.
 
-You first need to install the original vim plugin, or at least have the syntax
-files available:
+== Running ==
 
- ~/.vim/syntax/notmuch-{compose,folders,git-diff,search,show}.vim
-
-If you have the notmuch source code available, just go to the 'vim' directory
-and type 'make install' (make sure you create the missing directories if the
-build complains).
-
-Then just copy notmuch-ruby.vim to ~/.vim/plugin/notmuch-ruby.vim.
-
-You can grab it from here:
-https://raw.github.com/felipec/notmuch-vim-ruby/master/notmuch-ruby.vim
-
-That's it just, fire it up!
+Simple:
 
  % gvim -c ':NotMuchR'
 
@@ -99,5 +63,3 @@ let g:notmuch_rb_custom_search_maps = {
 let g:notmuch_rb_custom_show_maps = {
 	\ 't':		'show_tag("+to-do -inbox")',
 	\ }
-
-https://github.com/felipec/notmuch-vim-ruby
