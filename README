@@ -28,7 +28,15 @@ First of all make sure your vim version has ruby support: check for +ruby in
 
 === ruby bindings ===
 
-Go to notmuch source code, and then 'bindings/ruby':
+Check if you are able to run the following command cleanly:
+
+ % ruby -e "require 'notmuch'"
+
+If you don't see any errors, it means it's working and you can go to the next
+section.
+
+If it's not, you would need to compile it. Go to notmuch source code, and then
+'bindings/ruby':
 
  % ruby extconf.rb
  % make
@@ -42,12 +50,6 @@ add a few flags, so you don't have to export LD_LIBRARY_PATH all the time.
 If you don't want to mess with you system, you can just copy the .so file to
 any place you want, but make sure you export the RUBYLIB variable to point
 there.
-
-You should now be able to run
-
- % ruby -e "require 'notmuch'"
-
-cleanly. If you don't see any errors, it means it's working :)
 
 === mail gem ===
 
