@@ -402,8 +402,11 @@ function! s:NotMuchR()
 ruby << EOF
 	require 'notmuch'
 	require 'rubygems'
-	require 'mail'
 	require 'tempfile'
+	begin
+		require 'mail'
+	rescue LoadError
+	end
 
 	$db_name = nil
 	$email_address = nil
@@ -412,6 +415,7 @@ ruby << EOF
 	$threads = []
 	$messages = []
 	$config = {}
+	$mail_installed = defined?(Mail)
 
 	def get_config
 		group = nil
@@ -512,10 +516,15 @@ ruby << EOF
 			lines << ''
 
 			body_lines = []
-			addr = Mail::Address.new(orig[:from].value)
-			name = addr.name
-			name = addr.local + "@" if name.nil? && !addr.local.nil?
+			if $mail_installed
+				addr = Mail::Address.new(orig[:from].value)
+				name = addr.name
+				name = addr.local + "@" if name.nil? && !addr.local.nil?
+			else
+				name = orig[:from]
+			end
 			name = "somebody" if name.nil?
+
 			body_lines << "%s wrote:" % name
 			part = orig.find_first_text
 			part.convert.each_line do |l|
@@ -575,7 +584,11 @@ ruby << EOF
 			items.each do |e|
 				authors = e.authors.to_utf8.split(/[,|]/).map { |a| author_filter(a) }.join(",")
 				date = Time.at(e.newest_date).strftime(date_fmt)
-				subject = Mail::Field.new("Subject: " + e.subject).to_s
+				if $mail_installed
+					subject = Mail::Field.new("Subject: " + e.subject).to_s
+				else
+					subject = e.subject.force_encoding('utf-8')
+				end
 				b << "%-12s %3s %-20.20s | %s (%s)" % [date, e.matched_messages, authors, subject, e.tags]
 				$threads << e.thread_id
 			end
@@ -613,6 +626,7 @@ ruby << EOF
 			@mail = mail
 			@start = 0
 			@end = 0
+			mail.import_headers(msg) if not $mail_installed
 		end
 
 		def to_s
@@ -682,23 +696,129 @@ ruby << EOF
 		end
 	end
 
-	class Mail::Message
-		def find_first_text
-			return self if not multipart?
-			return text_part || html_part
+	module SimpleMessage
+		class Header < Array
+			def self.parse(string)
+				return nil if string.empty?
+				return Header.new(string.split(/,\s+/))
+			end
+
+			def to_s
+				self.join(', ')
+			end
 		end
 
-		def convert
-			if mime_type != "text/html"
-				text = decoded
+		def initialize(string = nil)
+			@raw_source = string
+			@body = nil
+			@headers = {}
+
+			return if not string
+
+			if string =~ /(.*?(\r\n|\n))\2/m
+				head, body = $1, $' || '', $2
 			else
-				IO.popen("elinks --dump", "w+") do |pipe|
-					pipe.write(decode_body)
-					pipe.close_write
-					text = pipe.read
-				end
+				head, body = string, ''
 			end
-			text
+			@body = body
+		end
+
+		def [](name)
+			@headers[name.to_sym]
+		end
+
+		def []=(name, value)
+			@headers[name.to_sym] = value
+		end
+
+		def format_header(value)
+			value.to_s.tr('_', '-').gsub(/(\w+)/) { $1.capitalize }
+		end
+
+		def to_s
+			buffer = ''
+			@headers.each do |key, value|
+				buffer << "%s: %s\r\n" %
+					[format_header(key), value]
+			end
+			buffer << "\r\n"
+			buffer << @body
+			buffer
+		end
+
+		def body=(value)
+			@body = value
+		end
+
+		def from
+			@headers[:from]
+		end
+
+		def decoded
+			@body
+		end
+
+		def mime_type
+			'text/plain'
+		end
+
+		def multipart?
+			false
+		end
+
+		def reply
+			r = Mail::Message.new
+			r[:from] = self[:to]
+			r[:to] = self[:from]
+			r[:cc] = self[:cc]
+			r[:in_reply_to] = self[:message_id]
+			r[:references] = self[:references]
+			r
+		end
+
+		HEADERS = [ :from, :to, :cc, :references, :in_reply_to, :reply_to, :message_id ]
+
+		def import_headers(m)
+			HEADERS.each do |e|
+				dashed = format_header(e)
+				@headers[e] = Header.parse(m[dashed])
+			end
+		end
+	end
+
+	module Mail
+
+		if not $mail_installed
+			puts "WARNING: Install the 'mail' gem, without it support is limited"
+
+			def self.read(filename)
+				Message.new(File.open(filename, 'rb') { |f| f.read })
+			end
+
+			class Message
+				include SimpleMessage
+			end
+		end
+
+		class Message
+
+			def find_first_text
+				return self if not multipart?
+				return text_part || html_part
+			end
+
+			def convert
+				if mime_type != "text/html"
+					text = decoded
+				else
+					IO.popen("elinks --dump", "w+") do |pipe|
+						pipe.write(decode_body)
+						pipe.close_write
+						text = pipe.read
+					end
+				end
+				text
+			end
 		end
 	end
 
