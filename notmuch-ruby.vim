@@ -591,6 +591,7 @@ ruby << EOF
 				e.thaw
 				e.tags_to_maildir_flags
 			end
+			q.destroy!
 		end
 	end
 
@@ -598,11 +599,15 @@ ruby << EOF
 		def initialize(name)
 			@name = name
 			@db = Notmuch::Database.new(@name)
+			@queries = []
 		end
 		def query(*args)
-			@db.query(*args)
+			q = @db.query(*args)
+			@queries << q
+			q
 		end
 		def reopen
+			@queries.delete_if { |q| ! q.destroy! }
 			@db.close
 			@db = Notmuch::Database.new(@name)
 		end
