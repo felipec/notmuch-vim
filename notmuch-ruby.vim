@@ -294,34 +294,33 @@ ruby << EOF
 	thread_id = VIM::evaluate('a:thread_id')
 	$cur_thread = thread_id
 	$messages.clear
+	$db.reopen
 	$curbuf.render do |b|
-		do_read do |db|
-			q = db.query(get_cur_view)
-			q.sort = 0
-			msgs = q.search_messages
-			msgs.each do |msg|
-				m = Mail.read(msg.filename)
-				part = m.find_first_text
-				nm_m = Message.new(msg, m)
-				$messages << nm_m
-				date_fmt = VIM::evaluate('g:notmuch_rb_datetime_format')
-				date = Time.at(msg.date).strftime(date_fmt)
-				nm_m.start = b.count
-				b << "%s %s (%s)" % [msg['from'], date, msg.tags]
-				b << "Subject: %s" % [msg['subject']]
-				b << "To: %s" % msg['to']
-				b << "Cc: %s" % msg['cc']
-				b << "Date: %s" % msg['date']
-				nm_m.body_start = b.count
-				b << "--- %s ---" % part.mime_type
-				part.convert.each_line do |l|
-					b << l.chomp
-				end
-				b << ""
-				nm_m.end = b.count
+		q = $db.query(get_cur_view)
+		q.sort = 0
+		msgs = q.search_messages
+		msgs.each do |msg|
+			m = Mail.read(msg.filename)
+			part = m.find_first_text
+			nm_m = Message.new(msg, m)
+			$messages << nm_m
+			date_fmt = VIM::evaluate('g:notmuch_rb_datetime_format')
+			date = Time.at(msg.date).strftime(date_fmt)
+			nm_m.start = b.count
+			b << "%s %s (%s)" % [msg['from'], date, msg.tags]
+			b << "Subject: %s" % [msg['subject']]
+			b << "To: %s" % msg['to']
+			b << "Cc: %s" % msg['cc']
+			b << "Date: %s" % msg['date']
+			nm_m.body_start = b.count
+			b << "--- %s ---" % part.mime_type
+			part.convert.each_line do |l|
+				b << l.chomp
 			end
-			b.delete(b.count)
+			b << ""
+			nm_m.end = b.count
 		end
+		b.delete(b.count)
 	end
 	$messages.each_with_index do |msg, i|
 		VIM::command("syntax region nmShowMsg#{i}Desc start='\\%%%il' end='\\%%%il' contains=@nmShowMsgDesc" % [msg.start, msg.start + 1])
@@ -431,6 +430,7 @@ ruby << EOF
 		end
 
 		$db_name = $config['database.path']
+		$db = DbHelper.new($db_name)
 		$email_address = "%s <%s>" % [$config['user.name'], $config['user.primary_email']]
 	end
 
@@ -466,24 +466,6 @@ ruby << EOF
 			return "#{$cur_thread} and (#{$cur_filter})"
 		else
 			return $cur_thread
-		end
-	end
-
-	def do_write
-		db = Notmuch::Database.new($db_name, :mode => Notmuch::MODE_READ_WRITE)
-		begin
-			yield db
-		ensure
-			db.close
-		end
-	end
-
-	def do_read
-		db = Notmuch::Database.new($db_name)
-		begin
-			yield db
-		ensure
-			db.close
 		end
 	end
 
@@ -555,25 +537,24 @@ ruby << EOF
 	end
 
 	def folders_render()
+		$db.reopen
 		$curbuf.render do |b|
 			folders = VIM::evaluate('g:notmuch_rb_folders')
 			count_threads = VIM::evaluate('g:notmuch_rb_folders_count_threads')
 			$searches.clear
-			do_read do |db|
-				folders.each do |name, search|
-					q = db.query(search)
-					$searches << search
-					count = count_threads ? q.search_threads.count : q.search_messages.count
-					b << "%9d %-20s (%s)" % [count, name, search]
-				end
+			folders.each do |name, search|
+				q = $db.query(search)
+				$searches << search
+				count = count_threads ? q.search_threads.count : q.search_messages.count
+				b << "%9d %-20s (%s)" % [count, name, search]
 			end
 		end
 	end
 
 	def search_render(search)
 		date_fmt = VIM::evaluate('g:notmuch_rb_date_format')
-		db = Notmuch::Database.new($db_name)
-		q = db.query(search)
+		$db.reopen
+		q = $db.query(search)
 		$threads.clear
 		t = q.search_threads
 
@@ -593,7 +574,7 @@ ruby << EOF
 	end
 
 	def do_tag(filter, tags)
-		do_write do |db|
+		$db.do_write do |db|
 			q = db.query(filter)
 			q.search_messages.each do |e|
 				e.freeze
@@ -609,6 +590,28 @@ ruby << EOF
 				end
 				e.thaw
 				e.tags_to_maildir_flags
+			end
+		end
+	end
+
+	class DbHelper
+		def initialize(name)
+			@name = name
+			@db = Notmuch::Database.new(@name)
+		end
+		def query(*args)
+			@db.query(*args)
+		end
+		def reopen
+			@db.close
+			@db = Notmuch::Database.new(@name)
+		end
+		def do_write
+			db = Notmuch::Database.new(@name, :mode => Notmuch::MODE_READ_WRITE)
+			begin
+				yield db
+			ensure
+				db.close
 			end
 		end
 	end
