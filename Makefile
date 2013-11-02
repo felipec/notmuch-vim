@@ -7,7 +7,7 @@ all:
 	@echo "Nothing to build"
 
 install:
-	$(INSTALL) $(CURDIR)/notmuch-ruby.vim $(D)$(prefix)/plugin/notmuch-ruby.vim
+	$(INSTALL) $(CURDIR)/notmuch.vim $(D)$(prefix)/plugin/notmuch.vim
 	@$(foreach file,$(wildcard syntax/*), \
 		$(INSTALL) $(CURDIR)/$(file) $(D)$(prefix)/$(file);)
 

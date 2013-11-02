@@ -1,7 +1,7 @@
-== notmuch vim ruby ==
+== notmuch vim ==
 
 This is a vim plug-in that provides a fully usable mail client interface,
-utilizing the notmuch framework, through it's ruby bindings.
+utilizing the notmuch framework.
 
 == install ==
 
@@ -52,7 +52,7 @@ This gem is not mandatory, but it's extremely recommended.
 
 Simple:
 
- % gvim -c ':NotMuchR'
+ % gvim -c ':NotMuch'
 
 Enjoy ;)
 
