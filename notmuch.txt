@@ -21,7 +21,7 @@ every mail in the thread.
 ==============================================================================
 USAGE						*notmuch-usage*
 
-To use it, simply run the :NotMuch command.
+To use it, simply run the `:NotMuch` command.
 
 By default you start in the folder view which shows you default searches and
 the number of threads that match those:
@@ -35,7 +35,11 @@ search view. In both the search and folder views you can type `s` to type a
 new search, or `=` to refresh. To see a thread, type `enter` again.
 
 To exit a view, click `q`.
+
+Also, you can specify a search directly:
 >
+	:NotMuch is:inbox and date:yesterday..
+<
 ==============================================================================
 MAPPINGS					*notmuch-mappings*
 

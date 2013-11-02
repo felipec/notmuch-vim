@@ -54,6 +54,15 @@ Simple:
 
  % gvim -c ':NotMuch'
 
+You might want to write a wrapper script (e.g. `vnm`)
+
+ #!/bin/sh
+ gvim -c ":NotMuch $*"
+
+So you can run:
+
+ vnm is:inbox and date:yesterday..
+
 Enjoy ;)
 
 == More stuff ==
