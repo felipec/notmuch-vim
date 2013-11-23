@@ -589,6 +589,7 @@ ruby << EOF
 			addr = Mail::Address.new(orig[:from].value)
 			name = addr.name
 			name = addr.local + "@" if name.nil? && !addr.local.nil?
+                        name = "%s <%s>" % [name, addr.address] if !addr.address.nil?
                         if !orig.date.nil?
                             quote_datetime_format = VIM::evaluate('g:notmuch_reply_quote_datetime_format')
                             quote_datetime = orig.date.strftime quote_datetime_format
