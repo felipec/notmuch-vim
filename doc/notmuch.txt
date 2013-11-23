@@ -134,6 +134,13 @@ You can do the same for the thread view:
 >
 	let g:notmuch_datetime_format = '%d.%m.%y %H:%M:%S'
 <
+						*g:notmuch_reply_quote_format*
+
+If you want to change the reply quote format to show the email address:
+>
+	let g:notmuch_reply_quote_format = '%s <%s>'
+<
+
 						*g:notmuch_reply_quote_datetime_format*
 
 There's also a way to specy the reply quote datetime format:

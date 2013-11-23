@@ -57,6 +57,7 @@ let s:notmuch_folders_default = [
 
 let s:notmuch_date_format_default = '%d.%m.%y'
 let s:notmuch_datetime_format_default = '%d.%m.%y %H:%M:%S'
+let s:notmuch_reply_quote_format_default = '%s'
 let s:notmuch_reply_quote_datetime_format_default = ''
 let s:notmuch_reader_default = 'mutt -f %s'
 let s:notmuch_sendmail_default = 'sendmail'
@@ -420,6 +421,10 @@ function! s:set_defaults()
 		endif
 	endif
 
+	if !exists('g:notmuch_reply_quote_format')
+		let g:notmuch_reply_quote_format = s:notmuch_reply_quote_format_default
+	endif
+
 	if !exists('g:notmuch_reply_quote_datetime_format')
 		let g:notmuch_reply_quote_datetime_format = s:notmuch_reply_quote_datetime_format_default
 	endif
@@ -610,6 +615,8 @@ ruby << EOF
 			addr = Mail::Address.new(orig[:from].value)
 			name = addr.name
 			name = addr.local + "@" if name.nil? && !addr.local.nil?
+			name_format = VIM::evaluate('g:notmuch_reply_quote_format')
+			name = name_format % [name, addr.address] if !addr.address.nil?
 			date_format = VIM::evaluate('g:notmuch_reply_quote_datetime_format')
 			quote_datetime = orig.date.strftime(date_format) if !date_format.empty? and orig.date
 		else
