@@ -56,6 +56,7 @@ let s:notmuch_folders_default = [
 
 let s:notmuch_date_format_default = '%d.%m.%y'
 let s:notmuch_datetime_format_default = '%d.%m.%y %H:%M:%S'
+let s:notmuch_reply_quote_datetime_format_default = 'On %a, %Y-%m-%d at %H:%M:%S %z'
 let s:notmuch_reader_default = 'mutt -f %s'
 let s:notmuch_sendmail_default = 'sendmail'
 let s:notmuch_folders_count_threads_default = 0
@@ -399,6 +400,10 @@ function! s:set_defaults()
 		endif
 	endif
 
+	if !exists('g:notmuch_reply_quote_datetime_format')
+		let g:notmuch_reply_quote_datetime_format = s:notmuch_reply_quote_datetime_format_default
+	endif
+
 	if !exists('g:notmuch_reader')
 		if exists('g:notmuch_rb_reader')
 			let g:notmuch_reader = g:notmuch_rb_reader
@@ -584,12 +589,22 @@ ruby << EOF
 			addr = Mail::Address.new(orig[:from].value)
 			name = addr.name
 			name = addr.local + "@" if name.nil? && !addr.local.nil?
+                        if !orig.date.nil?
+                            quote_datetime_format = VIM::evaluate('g:notmuch_reply_quote_datetime_format')
+                            quote_datetime = orig.date.strftime quote_datetime_format
+                        end
 		else
 			name = orig[:from]
+			quote_datetime = orig[:date]
 		end
 		name = "somebody" if name.nil?
+                if quote_datetime.nil?
+                    quote_datetime = ''
+                else
+                    quote_datetime += ', '
+                end
 
-		body_lines << "%s wrote:" % name
+		body_lines << "%s%s wrote:" % [quote_datetime, name]
 		part = orig.find_first_text
 		part.convert.each_line do |l|
 			body_lines << "> %s" % l.chomp
