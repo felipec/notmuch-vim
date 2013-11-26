@@ -699,6 +699,12 @@ ruby << EOF
 		def query(*args)
 			q = @db.query(*args)
 			@queries << q
+			exclude_tags = $config['search.exclude_tags']
+			if !exclude_tags.nil?
+				exclude_tags.split(/;/).each do |exclude|
+					q.add_tag_exclude(exclude)
+				end
+			end
 			q
 		end
 
