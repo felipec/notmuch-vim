@@ -57,6 +57,7 @@ let s:notmuch_folders_default = [
 let s:notmuch_date_format_default = '%d.%m.%y'
 let s:notmuch_datetime_format_default = '%d.%m.%y %H:%M:%S'
 let s:notmuch_reply_quote_datetime_format_default = 'On %a, %Y-%m-%d at %H:%M:%S %z'
+let s:notmuch_reply_quote_default = 0
 let s:notmuch_reader_default = 'mutt -f %s'
 let s:notmuch_sendmail_default = 'sendmail'
 let s:notmuch_folders_count_threads_default = 0
@@ -400,8 +401,16 @@ function! s:set_defaults()
 		endif
 	endif
 
+	if !exists('g:notmuch_reply_quote')
+		let g:notmuch_reply_quote = s:notmuch_reply_quote_default
+	endif
+
 	if !exists('g:notmuch_reply_quote_datetime_format')
-		let g:notmuch_reply_quote_datetime_format = s:notmuch_reply_quote_datetime_format_default
+		if g:notmuch_reply_quote
+			let g:notmuch_reply_quote_datetime_format = s:notmuch_reply_quote_datetime_format_default
+		else
+			let g:notmuch_reply_quote_datetime_format = ''
+		endif
 	endif
 
 	if !exists('g:notmuch_reader')
@@ -589,21 +598,23 @@ ruby << EOF
 			addr = Mail::Address.new(orig[:from].value)
 			name = addr.name
 			name = addr.local + "@" if name.nil? && !addr.local.nil?
-                        name = "%s <%s>" % [name, addr.address] if !addr.address.nil?
-                        if !orig.date.nil?
-                            quote_datetime_format = VIM::evaluate('g:notmuch_reply_quote_datetime_format')
-                            quote_datetime = orig.date.strftime quote_datetime_format
-                        end
+			if VIM::evaluate('g:notmuch_reply_quote') == 1
+				name = "%s <%s>" % [name, addr.address] if !addr.address.nil?
+			end
+			if !orig.date.nil?
+				quote_datetime_format = VIM::evaluate('g:notmuch_reply_quote_datetime_format')
+				quote_datetime = orig.date.strftime quote_datetime_format
+			end
 		else
 			name = orig[:from]
 			quote_datetime = orig[:date]
 		end
 		name = "somebody" if name.nil?
-                if quote_datetime.nil?
-                    quote_datetime = ''
-                else
-                    quote_datetime += ', '
-                end
+		if quote_datetime.nil? or quote_datetime.length == 0
+			quote_datetime = ''
+		else
+			quote_datetime += ', '
+		end
 
 		body_lines << "%s%s wrote:" % [quote_datetime, name]
 		part = orig.find_first_text
