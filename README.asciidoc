@@ -3,7 +3,7 @@
 This is a vim plug-in that provides a fully usable mail client interface,
 utilizing the notmuch framework.
 
-== install ==
+== Install ==
 
 Simply run 'make install'. However, check that you have the depencies below.
 
@@ -11,6 +11,8 @@ Simply run 'make install'. However, check that you have the depencies below.
 
 Make sure your vim version has ruby support: check for +ruby in 'vim --version'
 features.
+
+ % vim --version | grep +ruby
 
 === ruby bindings ===
 
@@ -61,7 +63,7 @@ You might want to write a wrapper script (e.g. `vnm`)
 
 So you can run:
 
- vnm is:inbox and date:yesterday..
+ vnm is:inbox date:yesterday..
 
 Enjoy ;)
 
@@ -70,6 +72,7 @@ Enjoy ;)
 As an example to configure a key mapping to add the tag 'to-do' and archive,
 this is what I use:
 
+----
 let g:notmuch_rb_custom_search_maps = {
 	\ 't':		'search_tag("+to-do -inbox")',
 	\ }
@@ -77,3 +80,4 @@ let g:notmuch_rb_custom_search_maps = {
 let g:notmuch_rb_custom_show_maps = {
 	\ 't':		'show_tag("+to-do -inbox")',
 	\ }
+----
