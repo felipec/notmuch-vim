@@ -327,6 +327,9 @@ ruby << EOF
 			b << "Cc: %s" % msg['cc']
 			b << "Date: %s" % msg['date']
 			nm_m.body_start = b.count
+			m.attachments.each do |att|
+				b << "--- %s ---" % att.filename
+			end
 			b << "--- %s ---" % part.mime_type
 			part.convert.each_line do |l|
 				b << l.chomp
