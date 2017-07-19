@@ -93,7 +93,7 @@ You can add the following configurations to your `.vimrc`, or
 
 						*g:notmuch_folders*
 
-The first thing you might want to do is set your custom searches.
+The first thing you might want to do is to set your custom searches.
 >
 	let g:notmuch_folders = [
 		\ [ 'new', 'tag:inbox and tag:unread' ],
@@ -144,7 +144,7 @@ If you want to count the threads instead of the messages in the folder view:
 						*g:notmuch_reader*
 						*g:notmuch_sendmail*
 
-You can also configure your externail mail reader and sendemail program:
+You can also configure your external mail reader and sendmail program:
 >
 	let g:notmuch_reader = 'mutt -f %s'
 	let g:notmuch_sendmail = 'sendmail'
