@@ -462,9 +462,8 @@ function! s:NotMuch(...)
 
 ruby << EOF
 	require 'notmuch'
-	require 'rubygems'
-	require 'tempfile'
 	require 'socket'
+	require 'tempfile'
 	begin
 		require 'mail'
 	rescue LoadError
