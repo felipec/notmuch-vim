@@ -328,7 +328,7 @@ ruby << EOF
 			b << "Date: %s" % msg['date']
 			nm_m.body_start = b.count
 			if part
-				b << "--- %s ---" % part.mime_type
+				b << "--- %s ---" % [part.mime_type || 'none']
 				part.convert.each_line do |l|
 					b << l.chomp
 				end
@@ -914,7 +914,7 @@ ruby << EOF
 
 			def find_first_text
 				return self if not multipart?
-				return text_part || html_part
+				return text_part || html_part || parts.first
 			end
 
 			def convert
