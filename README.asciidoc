@@ -22,33 +22,17 @@ Check if you are able to run the following command cleanly:
 
  % ruby -e "require 'notmuch'"
 
-If you don't see any errors, it means it's working and you can go to the next
-section.
-
-If it's not, you would need to compile it. An easy way to do that is by
-downloading notmuch's source code:
-
- % git clone --branch=0.15.2 git://notmuchmail.org/git/notmuch ~/notmuch
-
-And then:
-
- % make build notmuch=~/notmuch
-
-(Note: you need to specify the notmuch source directory)
+If you don't see any errors it means it's working and you can go to the next
+section, if not, you would need to compile the bindings yourself, or
+contact your distribution so they package notmuch correctly.
 
 === mail gem ===
 
 Since libnotmuch library concentrates on things other than handling mail, we
 need a library to do that, and for Ruby the best library for that is called
-'mail'. The easiest way to install it is with ruby's gem. In most distro's the
-package is called 'rubygems'.
-
-Once you have gem, run:
+'mail':
 
  % gem install mail
-
-In some systems gems are installed on a per-user basis by default, so make sure
-you are running as the same user as the one that installed them.
 
 This gem is not mandatory, but it's extremely recommended.
 
