@@ -327,9 +327,13 @@ ruby << EOF
 			b << "Cc: %s" % msg['cc']
 			b << "Date: %s" % msg['date']
 			nm_m.body_start = b.count
-			b << "--- %s ---" % part.mime_type
-			part.convert.each_line do |l|
-				b << l.chomp
+			if part
+				b << "--- %s ---" % part.mime_type
+				part.convert.each_line do |l|
+					b << l.chomp
+				end
+			else
+				b << "--- %s ---" % 'missing'
 			end
 			b << ""
 			nm_m.end = b.count
