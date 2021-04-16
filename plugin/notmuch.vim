@@ -39,6 +39,7 @@ let g:notmuch_show_maps = {
 	\ 'p':		'show_save_patches()',
 	\ 'r':		'show_reply()',
 	\ '?':		'show_info()',
+	\ '.':		'copy_id()',
 	\ '<Tab>':	'show_next_msg()',
 	\ 'c':		'compose()',
 	\ }
@@ -141,6 +142,12 @@ function! s:compose()
 	call s:set_map(g:notmuch_compose_maps)
 	autocmd BufDelete <buffer> call s:on_compose_delete()
 	startinsert!
+endfunction
+
+function! s:copy_id()
+ruby << EOF
+	VIM::command("let @+='%s'" % get_message.message_id)
+EOF
 endfunction
 
 function! s:show_info()
