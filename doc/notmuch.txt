@@ -104,6 +104,7 @@ The first thing you might want to do is set your custom searches.
 		\ ]
 <
 
+						*g:notmuch_custom_folders_maps*
 						*g:notmuch_custom_search_maps*
 						*g:notmuch_custom_show_maps*
 

@@ -451,6 +451,10 @@ function! s:set_defaults()
 		let g:notmuch_custom_show_maps = g:notmuch_rb_custom_show_maps
 	endif
 
+	if exists('g:notmuch_custom_folders_maps')
+		call extend(g:notmuch_folders_maps, g:notmuch_custom_folders_maps)
+	endif
+
 	if exists('g:notmuch_custom_search_maps')
 		call extend(g:notmuch_search_maps, g:notmuch_custom_search_maps)
 	endif
