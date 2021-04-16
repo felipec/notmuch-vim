@@ -5,7 +5,9 @@ utilizing the notmuch framework.
 
 == Install ==
 
-Simply run 'make install'. However, check that you have the depencies below.
+You can use any vim plugin manager:
+
+ % git clone https://github.com/felipec/notmuch-vim.git ~/.vim/pack/plugins/start/notmuch-vim
 
 === vim +ruby ===
 
