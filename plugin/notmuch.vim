@@ -504,17 +504,9 @@ ruby << EOF
 	$mail_installed = defined?(Mail)
 
 	def get_config
-		group = nil
-		config = ENV['NOTMUCH_CONFIG'] || '~/.notmuch-config'
-		File.open(File.expand_path(config)).each do |l|
-			l.chomp!
-			case l
-			when /^\[(.*)\]$/
-				group = $1
-			when ''
-			when /^(.*)=(.*)$/
-				key = "%s.%s" % [group, $1]
-				value = $2
+		IO.popen(%w[notmuch config list]) do |io|
+			io.each(chomp: true) do |e|
+				key, value = e.split('=')
 				$config[key] = value
 			end
 		end
