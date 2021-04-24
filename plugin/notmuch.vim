@@ -1,12 +1,7 @@
-if exists("g:loaded_notmuch")
-	finish
+if exists('g:loaded_notmuch') || v:version < 700 || !has('ruby')
+  finish
 endif
-
-if !has("ruby") || version < 700
-	finish
-endif
-
-let g:loaded_notmuch = "yep"
+let g:loaded_notmuch = 1
 
 let g:notmuch_folders_maps = {
 	\ '<Enter>':	'folders_show_search()',
