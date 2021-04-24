@@ -938,9 +938,9 @@ ruby << EOF
 	get_config
 EOF
 	if a:0
-	  call s:search(join(a:000))
+		call s:search(join(a:000))
 	else
-	  call s:folders()
+		call s:folders()
 	endif
 endfunction
 
