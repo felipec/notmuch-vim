@@ -729,20 +729,18 @@ ruby << EOF
 			@b = buffer
 			@enumerable = enumerable
 			@block = block
-			@last_render = 0
 
 			@b.render { do_next }
 		end
 
 		def is_ready?
-			@last_render - @b.line_number <= $curwin.height
+			@b.line_number > @b.count - $curwin.height
 		end
 
 		def do_next
 			items = @enumerable.take($curwin.height * 2)
 			return if items.empty?
 			@block.call @b, items
-			@last_render = @b.count
 		end
 	end
 
