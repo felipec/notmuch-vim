@@ -633,7 +633,7 @@ ruby << EOF
 
 		$render = $curbuf.render_staged(t) do |b, items|
 			items.each do |e|
-				authors = e.authors.to_utf8.split(/[,|]/).map { |a| author_filter(a) }.join(",")
+				authors = e.authors.force_encoding('utf-8').split(/[,|]/).map { |a| author_filter(a) }.join(",")
 				date = Time.at(e.newest_date).strftime(date_fmt)
 				subject = e.messages.first['subject']
 				if $mail_installed
@@ -918,12 +918,6 @@ ruby << EOF
 				buffer << body.to_s
 				buffer
 			end
-		end
-	end
-
-	class String
-		def to_utf8
-			RUBY_VERSION >= "1.9" ? force_encoding('utf-8') : self
 		end
 	end
 
