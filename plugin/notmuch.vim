@@ -39,7 +39,7 @@ let g:notmuch_show_maps = {
 	\ 'p':		'show_save_patches()',
 	\ 'r':		'show_reply()',
 	\ '?':		'show_info()',
-	\ '.':		'copy_id()',
+	\ '.':		'show_copy_id()',
 	\ '<Tab>':	'show_next_msg()',
 	\ 'c':		'compose()',
 	\ }
@@ -150,14 +150,14 @@ function! s:compose()
 	startinsert!
 endfunction
 
-function! s:copy_id()
+function! s:show_info()
+	ruby vim_puts get_message.inspect
+endfunction
+
+function! s:show_copy_id()
 ruby << EOF
 	VIM::command("let @+='%s'" % get_message.message_id)
 EOF
-endfunction
-
-function! s:show_info()
-	ruby vim_puts get_message.inspect
 endfunction
 
 function! s:show_extract_msg()
