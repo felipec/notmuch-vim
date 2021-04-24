@@ -58,10 +58,6 @@ let s:notmuch_reader_default = 'mutt -f %s'
 let s:notmuch_sendmail_default = 'sendmail'
 let s:notmuch_folders_count_threads_default = 0
 
-function! s:system(cmd)
-	execute '!' . a:cmd
-endfunction
-
 function! s:new_file_buffer(type, fname)
 	exec printf('edit %s', a:fname)
 	execute printf('set filetype=notmuch-%s', a:type)
@@ -254,6 +250,10 @@ function! s:folders_refresh()
 	ruby $curbuf.reopen
 	ruby folders_render()
 	setlocal nomodifiable
+endfunction
+
+function! s:system(cmd)
+	execute '!' . a:cmd
 endfunction
 
 "" basic
