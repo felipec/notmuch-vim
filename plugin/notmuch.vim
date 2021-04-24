@@ -142,7 +142,7 @@ function! s:compose()
 endfunction
 
 function! s:show_info()
-	ruby vim_puts get_message.inspect
+	ruby puts get_message.inspect
 endfunction
 
 function! s:show_copy_id()
@@ -191,7 +191,7 @@ ruby << EOF
 		file = "%04d.patch" % [n += 1]
 		system "notmuch show --format=mbox id:#{m.message_id} > #{file}"
 	end
-	vim_puts "Saved #{n} patches"
+	puts "Saved #{n} patches"
 EOF
 endfunction
 
@@ -220,7 +220,7 @@ EOF
 endfunction
 
 function! s:search_info()
-	ruby vim_puts get_thread_id
+	ruby puts get_thread_id
 endfunction
 
 function! s:search_refresh()
@@ -475,14 +475,6 @@ ruby << EOF
 		$email_address = config['user.primary_email']
 		$exclude_tags = config['search.exclude_tags']&.split(';') || []
 		$email = "%s <%s>" % [$email_name, $email_address]
-	end
-
-	def vim_puts(s)
-		VIM::command("echo '#{s.to_s}'")
-	end
-
-	def vim_p(s)
-		VIM::command("echo '#{s.inspect}'")
 	end
 
 	def author_filter(a)
