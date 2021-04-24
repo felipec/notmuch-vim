@@ -468,21 +468,17 @@ ruby << EOF
 	$searches = []
 	$threads = []
 	$messages = []
-	$config = {}
 	$mail_installed = defined?(Mail)
 
 	def get_config
-		IO.popen(%w[notmuch config list]) do |io|
-			io.each(chomp: true) do |e|
-				key, value = e.split('=')
-				$config[key] = value
-			end
+		config = IO.popen(%w[notmuch config list]) do |io|
+			io.each(chomp: true).map { |e| e.split('=') }.to_h
 		end
 
-		$db_name = $config['database.path']
-		$email_name = $config['user.name']
-		$email_address = $config['user.primary_email']
-		$exclude_tags = $config['search.exclude_tags']&.split(';') || []
+		$db_name = config['database.path']
+		$email_name = config['user.name']
+		$email_address = config['user.primary_email']
+		$exclude_tags = config['search.exclude_tags']&.split(';') || []
 		$email = "%s <%s>" % [$email_name, $email_address]
 	end
 
