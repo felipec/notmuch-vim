@@ -36,6 +36,7 @@ let g:notmuch_show_maps = {
 	\ '?':		'show_info()',
 	\ '.':		'show_copy_id()',
 	\ '<Tab>':	'show_next_msg()',
+	\ '<Space>':	'show_message_tag("-inbox -unread")',
 	\ 'c':		'compose()',
 	\ }
 
@@ -204,6 +205,16 @@ function! s:show_tag(intags)
 	endif
 	ruby do_tag(get_cur_view, VIM::evaluate('l:tags'))
 	call s:show_next_thread()
+endfunction
+
+function! s:show_message_tag(intags)
+	if empty(a:intags)
+		let tags = input('tags: ')
+	else
+		let tags = a:intags
+	endif
+	ruby do_tag('id:' + get_message.message_id, VIM::evaluate('l:tags'))
+  call s:show_next_msg()
 endfunction
 
 function! s:search_search_prompt()
