@@ -666,8 +666,8 @@ ruby << EOF
 	def do_tag(filter, tags)
 		$curbuf.do_write do |db|
 			q = db.query(filter)
+			db.begin_atomic
 			q.search_messages.each do |e|
-				e.freeze
 				tags.split.each do |t|
 					case t
 					when /^-(.*)/
@@ -678,9 +678,9 @@ ruby << EOF
 						e.add_tag($1)
 					end
 				end
-				e.thaw
 				e.tags_to_maildir_flags
 			end
+			db.end_atomic
 			q.destroy!
 		end
 	end
