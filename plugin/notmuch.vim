@@ -56,6 +56,7 @@ let s:notmuch_reply_quote_format_default = '%s'
 let s:notmuch_reply_quote_datetime_format_default = ''
 let s:notmuch_reader_default = 'mutt -f %s'
 let s:notmuch_sendmail_default = 'sendmail'
+let s:notmuch_html_converter_default = 'elinks -dump -eval "set document.browse.margin_width=0"'
 let s:notmuch_folders_count_threads_default = 0
 
 function! s:new_file_buffer(type, fname)
@@ -426,6 +427,10 @@ function! s:set_defaults()
 
 	if !exists('g:notmuch_sendmail')
 		let g:notmuch_sendmail = s:notmuch_sendmail_default
+	endif
+
+	if !exists('g:notmuch_html_converter')
+		let g:notmuch_html_converter = s:notmuch_html_converter_default
 	endif
 
 	if !exists('g:notmuch_folders_count_threads')
@@ -897,8 +902,7 @@ ruby << EOF
 				if mime_type != "text/html"
 					text = decoded
 				else
-					IO.popen(VIM::evaluate('exists("g:notmuch_html_converter") ? ' +
-							'g:notmuch_html_converter : "elinks --dump"'), "w+") do |pipe|
+					IO.popen(VIM::evaluate('g:notmuch_html_converter'), "w+") do |pipe|
 						pipe.write(decode_body)
 						pipe.close_write
 						text = pipe.read
