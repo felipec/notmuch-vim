@@ -3,6 +3,8 @@
 This is a vim plug-in that provides a fully usable mail client interface,
 utilizing the notmuch framework.
 
+image::https://asciinema.org/a/oo4yUOQDDF2CrWZbzhZURFtTW.svg[link="https://asciinema.org/a/oo4yUOQDDF2CrWZbzhZURFtTW"]
+
 == Install ==
 
 You can use any vim plugin manager:
