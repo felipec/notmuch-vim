@@ -483,7 +483,7 @@ ruby << EOF
 
 	def get_config
 		config = IO.popen(%w[notmuch config list]) do |io|
-			io.each(chomp: true).map { |e| e.split('=') }.to_h
+			io.each(chomp: true).map { |e| e.split('=', 2) }.to_h
 		end
 
 		$db_name = config['database.path']
