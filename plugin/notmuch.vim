@@ -543,7 +543,7 @@ ruby << EOF
 			f.puts(lines)
 
 			sig_file = File.expand_path('~/.signature')
-			if File.exists?(sig_file)
+			if File.exist?(sig_file)
 				f.puts("-- ")
 				f.write(File.read(sig_file))
 			end
